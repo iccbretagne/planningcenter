@@ -46,6 +46,7 @@ Next.js 15 &middot; React 19 &middot; Tailwind CSS v4 &middot; NextAuth v5 &midd
 | [Base de donnees](docs/database.md) | Schema Prisma, modeles, relations |
 | [API](docs/api.md) | Endpoints, requetes, reponses |
 | [Authentification & roles](docs/auth.md) | NextAuth, OAuth, RBAC, permissions |
+| [Deploiement production](docs/production.md) | Debian, Traefik, systemd |
 | [Changelog](CHANGELOG.md) | Historique des modifications |
 
 ## Reste a faire

@@ -220,6 +220,7 @@ Chaque eglise (`Church`) est un tenant isole. Les donnees sont rattachees a une 
 | [Base de donnees](docs/database.md) | Schema Prisma, modeles, relations |
 | [API](docs/api.md) | Endpoints, requetes, reponses |
 | [Authentification](docs/auth.md) | NextAuth, OAuth, RBAC, permissions |
+| [Production](docs/production.md) | Deploiement Debian, Traefik, systemd |
 | [Roadmap](docs/roadmap.md) | Evolutions prevues |
 
 ## Regles pour les agents IA
