@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/EventSelector.tsx","./src/components/PlanningGrid.tsx","./src/context/AuthContext.tsx","./src/lib/api.ts","./src/pages/AuthCallback.tsx","./src/pages/Dashboard.tsx","./src/pages/Login.tsx"],"version":"5.9.3"}
