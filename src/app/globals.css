@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-icc-violet: #5E17EB;
+  --color-icc-violet-dark: #4a12bb;
+  --color-icc-violet-light: #f3edff;
+  --color-icc-jaune: #FFEB05;
+  --color-icc-jaune-dark: #d4c504;
+  --color-icc-rouge: #FF3131;
+  --color-icc-bleu: #38B6FF;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  header,
+  nav,
+  aside {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}

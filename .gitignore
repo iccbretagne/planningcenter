@@ -1,10 +1,15 @@
 node_modules/
 dist/
 .env
-*.log
+
+# Next.js
+.next/
 
 # Prisma
-server/prisma/generated/
+prisma/generated/
+
+# Logs
+*.log
 
 # IDE
 .idea/

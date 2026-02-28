@@ -1,112 +1,54 @@
 # PlanningCenter
 
-Application web multi-église de gestion des plannings de service.
-Conçue initialement pour ICC Rennes, pensée pour toute église structurée
-en ministères et départements.
+Application web de gestion des plannings de service pour eglises.
+Concue pour ICC Bretagne, adaptable a toute eglise structuree en ministeres et departements.
 
-## Fonctionnalités
+## Quick start
 
-- **Multi-tenant** : chaque église a son propre espace isolé
-- Authentification via Google OAuth
-- Gestion multi-rôles : Super Admin, Admin église, Secrétariat, Ministre, Responsable département
-- Structure personnalisable : ministères, départements, membres par église
-- Création d'événements avec sélection des départements concernés
-- Saisie des plannings par les responsables de département
-- Supervision et modification par les ministres
-- Génération automatique du tableau STAR EN SERVICE
-- Statuts de service clairs et directs
-
-## Stack technique
-
-- **Frontend** : React + Tailwind CSS
-- **Backend** : Node.js + Express
-- **Base de données** : MariaDB (base existante)
-- **ORM** : Prisma (connecteur MySQL)
-- **Auth** : Google OAuth 2.0
-- **Hébergement** : Serveur dédié
-
-## Architecture multi-tenant
-
-Chaque église dispose de sa propre base MariaDB isolée.
-Un Super Admin gère l'ensemble des églises depuis un tableau de bord dédié.
-```
-Super Admin
-    └── Église A (ex: ICC Rennes)
-    │       └── Ministères → Départements → Membres
-    └── Église B (ex: ICC Lyon)
-    │       └── Ministères → Départements → Membres
-    └── Église C ...
-```
-
-## Rôles
-
-| Rôle | Périmètre |
-|---|---|
-| Super Admin | Toutes les églises |
-| Admin église | Son église uniquement |
-| Secrétariat | Vue globale + génération planning |
-| Ministre | Son ministère (lecture + modification) |
-| Responsable département | Son/ses département(s) uniquement |
-
-## Statuts des membres
-
-| Statut | Description |
-|---|---|
-| 🟢 En service | Présent et en service |
-| 🎤 En service + Débrief | En service ET animateur du débrief de fin de culte (1 seul par département par événement) |
-| 🔴 Indisponible | Absent pour cet événement |
-| 🔄 Remplaçant | Remplace un membre indisponible |
-| *(vide)* | Non renseigné |
-
-## Schéma de base de données
-```sql
--- Tables principales
-churches             -- églises (multi-tenant)
-users                -- utilisateurs avec rôle par église
-ministries           -- ministères par église
-departments          -- départements par ministère
-members              -- membres par département
-events               -- événements par église
-event_departments    -- départements concernés par événement
-planning             -- statuts membres × événements
-```
-
-## Types d'événements
-
-- Culte du dimanche
-- Atmosphère de prière
-- Parlons la Parole
-- Conférence / événement spécial
-
-## Installation
 ```bash
-git clone https://github.com/[ton-compte]/planningcenter
+git clone https://github.com/iccbretagne/planningcenter.git
 cd planningcenter
+cp .env.example .env          # configurer Google OAuth + NEXTAUTH_SECRET
+docker-compose up -d           # MariaDB
 npm install
-cp .env.example .env
-npm run dev
+npm run db:push                # schema
+npm run db:seed                # donnees ICC Rennes
+npm run dev                    # http://localhost:3000
 ```
 
-## Variables d'environnement
-```env
-# Base de données
-DATABASE_URL=mysql://user:password@localhost:3306/planningcenter
+## Prerequis
 
-# Google OAuth
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
+- Node.js 18+
+- Docker
+- [Google OAuth 2.0](https://console.cloud.google.com/apis/credentials) configure avec `http://localhost:3000/api/auth/callback/google` en URI de redirection
 
-# App
-SESSION_SECRET=
-SUPER_ADMIN_EMAIL=
-APP_URL=
-```
+## Scripts
 
-## Roadmap
+| Commande | Description |
+|---|---|
+| `npm run dev` | Developpement (Turbopack) |
+| `npm run build` | Build de production |
+| `npm run start` | Production |
+| `npm run db:push` | Appliquer le schema Prisma |
+| `npm run db:seed` | Charger les donnees ICC Rennes |
 
-- [ ] Tableau de bord Super Admin
-- [ ] Onboarding nouvelle église
-- [ ] Notifications email / WhatsApp
-- [ ] Export PDF du planning STAR
-- [ ] Application mobile (PWA)
-- [ ] Statistiques de présence
+## Stack
+
+Next.js 15 &middot; React 19 &middot; Tailwind CSS v4 &middot; NextAuth v5 &middot; Prisma &middot; MariaDB &middot; TypeScript
+
+## Documentation
+
+| Document | Contenu |
+|---|---|
+| [Architecture](docs/architecture.md) | Structure du projet, patterns, conventions |
+| [Base de donnees](docs/database.md) | Schema Prisma, modeles, relations |
+| [API](docs/api.md) | Endpoints, requetes, reponses |
+| [Authentification & roles](docs/auth.md) | NextAuth, OAuth, RBAC, permissions |
+
+## Reste a faire
+
+Voir la [roadmap complete](docs/roadmap.md).
+
+## Licence
+
+[Apache License 2.0](LICENSE)

@@ -1,0 +1,62 @@
+import { prisma } from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth";
+import { successResponse, errorResponse, ApiError } from "@/lib/api-utils";
+import { z } from "zod";
+
+const updateSchema = z.object({
+  name: z.string().min(1, "Le nom est requis"),
+});
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ ministryId: string }> }
+) {
+  try {
+    await requirePermission("departments:manage");
+    const { ministryId } = await params;
+    const body = await request.json();
+    const data = updateSchema.parse(body);
+
+    const ministry = await prisma.ministry.update({
+      where: { id: ministryId },
+      data,
+      include: { church: { select: { id: true, name: true } } },
+    });
+
+    return successResponse(ministry);
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ ministryId: string }> }
+) {
+  try {
+    await requirePermission("departments:manage");
+    const { ministryId } = await params;
+
+    const ministry = await prisma.ministry.findUnique({
+      where: { id: ministryId },
+      include: { departments: true },
+    });
+
+    if (!ministry) {
+      throw new ApiError(404, "Ministere introuvable");
+    }
+
+    if (ministry.departments.length > 0) {
+      throw new ApiError(
+        400,
+        "Impossible de supprimer un ministere qui contient des departements"
+      );
+    }
+
+    await prisma.ministry.delete({ where: { id: ministryId } });
+
+    return successResponse({ success: true });
+  } catch (error) {
+    return errorResponse(error);
+  }
+}

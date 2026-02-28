@@ -1,0 +1,294 @@
+"use client";
+
+import { useState } from "react";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import Modal from "@/components/ui/Modal";
+import DataTable from "@/components/ui/DataTable";
+import BulkActionBar from "@/components/ui/BulkActionBar";
+
+interface Ministry {
+  id: string;
+  name: string;
+  church: { id: string; name: string };
+}
+
+interface Props {
+  initialMinistries: Ministry[];
+  churches: { id: string; name: string }[];
+}
+
+export default function MinistriesClient({
+  initialMinistries,
+  churches,
+}: Props) {
+  const [ministries, setMinistries] = useState(initialMinistries);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<Ministry | null>(null);
+  const [name, setName] = useState("");
+  const [churchId, setChurchId] = useState(churches[0]?.id || "");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
+  const [bulkName, setBulkName] = useState("");
+  const [bulkChurchId, setBulkChurchId] = useState("");
+  const [bulkError, setBulkError] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  function openCreate() {
+    setEditing(null);
+    setName("");
+    setChurchId(churches[0]?.id || "");
+    setError("");
+    setModalOpen(true);
+  }
+
+  function openEdit(m: Ministry) {
+    setEditing(m);
+    setName(m.name);
+    setChurchId(m.church.id);
+    setError("");
+    setModalOpen(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const url = editing
+        ? `/api/ministries/${editing.id}`
+        : "/api/ministries";
+      const method = editing ? "PUT" : "POST";
+      const body = editing ? { name } : { name, churchId };
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erreur");
+      }
+
+      const saved = await res.json();
+
+      if (editing) {
+        setMinistries((prev) =>
+          prev.map((m) => (m.id === saved.id ? saved : m))
+        );
+      } else {
+        setMinistries((prev) => [...prev, saved]);
+      }
+
+      setModalOpen(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(m: Ministry) {
+    if (!confirm(`Supprimer le ministere "${m.name}" ?`)) return;
+
+    try {
+      const res = await fetch(`/api/ministries/${m.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Erreur lors de la suppression");
+        return;
+      }
+      setMinistries((prev) => prev.filter((x) => x.id !== m.id));
+    } catch {
+      alert("Erreur lors de la suppression");
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (!confirm(`Supprimer ${selectedIds.size} ministere(s) ?`)) return;
+
+    try {
+      const res = await fetch("/api/ministries", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), action: "delete" }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Erreur lors de la suppression");
+        return;
+      }
+      setMinistries((prev) => prev.filter((m) => !selectedIds.has(m.id)));
+      setSelectedIds(new Set());
+    } catch {
+      alert("Erreur lors de la suppression");
+    }
+  }
+
+  function openBulkEdit() {
+    setBulkName("");
+    setBulkChurchId("");
+    setBulkError("");
+    setBulkModalOpen(true);
+  }
+
+  async function handleBulkEdit(e: React.FormEvent) {
+    e.preventDefault();
+    const data: Record<string, string> = {};
+    if (bulkName) data.name = bulkName;
+    if (bulkChurchId) data.churchId = bulkChurchId;
+
+    if (Object.keys(data).length === 0) {
+      setBulkError("Remplissez au moins un champ");
+      return;
+    }
+
+    setBulkLoading(true);
+    setBulkError("");
+
+    try {
+      const res = await fetch("/api/ministries", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), action: "update", data }),
+      });
+
+      if (!res.ok) {
+        const resp = await res.json();
+        throw new Error(resp.error || "Erreur");
+      }
+
+      setMinistries((prev) =>
+        prev.map((m) => (selectedIds.has(m.id) ? { ...m, ...data, ...(data.churchId ? { church: churches.find((c) => c.id === data.churchId) || m.church } : {}) } : m))
+      );
+      setSelectedIds(new Set());
+      setBulkModalOpen(false);
+    } catch (err) {
+      setBulkError(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setBulkLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <div className="mb-4">
+        <Button onClick={openCreate}>Nouveau ministere</Button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow">
+        <DataTable
+          columns={[
+            { header: "Nom", accessor: "name" },
+            {
+              header: "Eglise",
+              accessor: (m: Ministry) => m.church.name,
+            },
+          ]}
+          data={ministries}
+          emptyMessage="Aucun ministere."
+          selectable
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+          actions={(m) => (
+            <div className="flex gap-2 justify-end">
+              <Button variant="secondary" onClick={() => openEdit(m)}>
+                Modifier
+              </Button>
+              <Button variant="danger" onClick={() => handleDelete(m)}>
+                Supprimer
+              </Button>
+            </div>
+          )}
+        />
+      </div>
+
+      <BulkActionBar
+        count={selectedIds.size}
+        onEdit={openBulkEdit}
+        onDelete={handleBulkDelete}
+        onClear={() => setSelectedIds(new Set())}
+      />
+
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? "Modifier le ministere" : "Nouveau ministere"}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Nom"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          {!editing && (
+            <Select
+              label="Eglise"
+              value={churchId}
+              onChange={(e) => setChurchId(e.target.value)}
+              options={churches.map((c) => ({ value: c.id, label: c.name }))}
+            />
+          )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setModalOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        open={bulkModalOpen}
+        onClose={() => setBulkModalOpen(false)}
+        title={`Modifier ${selectedIds.size} ministere(s)`}
+      >
+        <p className="text-sm text-gray-500 mb-4">
+          Seuls les champs remplis seront modifies.
+        </p>
+        <form onSubmit={handleBulkEdit} className="space-y-4">
+          <Input
+            label="Nom"
+            value={bulkName}
+            onChange={(e) => setBulkName(e.target.value)}
+            placeholder="Laisser vide pour ne pas modifier"
+          />
+          <Select
+            label="Eglise"
+            value={bulkChurchId}
+            onChange={(e) => setBulkChurchId(e.target.value)}
+            placeholder="Ne pas modifier"
+            options={churches.map((c) => ({ value: c.id, label: c.name }))}
+          />
+          {bulkError && <p className="text-sm text-red-600">{bulkError}</p>}
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setBulkModalOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button type="submit" disabled={bulkLoading}>
+              {bulkLoading ? "Enregistrement..." : "Appliquer"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    </>
+  );
+}
