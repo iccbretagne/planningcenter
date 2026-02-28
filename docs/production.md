@@ -14,7 +14,7 @@ Guide de deploiement de PlanningCenter sur un serveur Debian avec Traefik, Maria
 Creer un utilisateur dedie :
 
 ```bash
-sudo useradd -r -m -d /opt/planningcenter -s /bin/bash planningcenter
+sudo useradd -r -m -d /opt/planning -s /bin/bash planning
 ```
 
 ## Structure des dossiers
@@ -22,7 +22,7 @@ sudo useradd -r -m -d /opt/planningcenter -s /bin/bash planningcenter
 L'application utilise une structure Capistrano-like :
 
 ```
-/opt/planningcenter/
+/opt/planning/
 ├── current -> releases/planningcenter-0.1.0   # symlink vers la release active
 ├── releases/
 │   ├── planningcenter-0.1.0/
@@ -35,15 +35,15 @@ L'application utilise une structure Capistrano-like :
 Creer la structure :
 
 ```bash
-sudo -u planningcenter mkdir -p /opt/planningcenter/{releases,shared}
+sudo -u planning mkdir -p /opt/planning/{releases,shared}
 ```
 
 ## Variables d'environnement
 
-Creer le fichier `/opt/planningcenter/shared/.env` :
+Creer le fichier `/opt/planning/shared/.env` :
 
 ```bash
-DATABASE_URL=mysql://planningcenter:MOT_DE_PASSE@localhost:3306/planningcenter
+DATABASE_URL=mysql://planning:MOT_DE_PASSE@localhost:3306/planning
 NEXTAUTH_SECRET=GENERER_AVEC_OPENSSL
 NEXTAUTH_URL=https://votre-domaine.com
 AUTH_TRUST_HOST=true
@@ -66,9 +66,9 @@ openssl rand -base64 32
 Creer la base et l'utilisateur MariaDB :
 
 ```sql
-CREATE DATABASE planningcenter CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'planningcenter'@'localhost' IDENTIFIED BY 'MOT_DE_PASSE';
-GRANT ALL PRIVILEGES ON planningcenter.* TO 'planningcenter'@'localhost';
+CREATE DATABASE planning CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'planning'@'localhost' IDENTIFIED BY 'MOT_DE_PASSE';
+GRANT ALL PRIVILEGES ON planning.* TO 'planning'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
@@ -78,7 +78,7 @@ FLUSH PRIVILEGES;
 
 ```bash
 # 1. Telecharger la release depuis GitHub
-cd /opt/planningcenter/releases
+cd /opt/planning/releases
 VERSION=0.1.0
 curl -L -o planningcenter-${VERSION}.tar.gz \
   https://github.com/iccbretagne/planningcenter/archive/refs/tags/v${VERSION}.tar.gz
@@ -88,48 +88,48 @@ tar xzf planningcenter-${VERSION}.tar.gz
 rm planningcenter-${VERSION}.tar.gz
 
 # 3. Lier le fichier .env
-ln -s /opt/planningcenter/shared/.env /opt/planningcenter/releases/planningcenter-${VERSION}/.env
+ln -s /opt/planning/shared/.env /opt/planning/releases/planningcenter-${VERSION}/.env
 
 # 4. Installer les dependances et construire
-cd /opt/planningcenter/releases/planningcenter-${VERSION}
+cd /opt/planning/releases/planningcenter-${VERSION}
 npm install --production=false
 npm run build
 
-# 5. Appliquer le schema et charger les donnees initiales
+# 5. Appliquer le schema
 npm run db:push
-npm run db:seed
+npm run db:seed    # optionnel : charge les donnees de demo ICC Rennes
 
 # 6. Activer la release
-ln -sfn /opt/planningcenter/releases/planningcenter-${VERSION} /opt/planningcenter/current
+ln -sfn /opt/planning/releases/planningcenter-${VERSION} /opt/planning/current
 
 # 7. Demarrer le service (voir section systemd ci-dessous)
-sudo systemctl start planningcenter
+sudo systemctl start planning
 ```
 
 ### Mises a jour
 
 ```bash
-cd /opt/planningcenter/releases
+cd /opt/planning/releases
 VERSION=X.Y.Z
 curl -L -o planningcenter-${VERSION}.tar.gz \
   https://github.com/iccbretagne/planningcenter/archive/refs/tags/v${VERSION}.tar.gz
 tar xzf planningcenter-${VERSION}.tar.gz
 rm planningcenter-${VERSION}.tar.gz
 
-ln -s /opt/planningcenter/shared/.env /opt/planningcenter/releases/planningcenter-${VERSION}/.env
+ln -s /opt/planning/shared/.env /opt/planning/releases/planningcenter-${VERSION}/.env
 
-cd /opt/planningcenter/releases/planningcenter-${VERSION}
+cd /opt/planning/releases/planningcenter-${VERSION}
 npm install --production=false
 npm run build
 npm run db:push
 
-ln -sfn /opt/planningcenter/releases/planningcenter-${VERSION} /opt/planningcenter/current
-sudo systemctl restart planningcenter
+ln -sfn /opt/planning/releases/planningcenter-${VERSION} /opt/planning/current
+sudo systemctl restart planning
 ```
 
 ## Service systemd
 
-Creer `/etc/systemd/system/planningcenter.service` :
+Creer `/etc/systemd/system/planning.service` :
 
 ```ini
 [Unit]
@@ -138,11 +138,11 @@ After=network.target mariadb.service
 
 [Service]
 Type=simple
-User=planningcenter
-Group=planningcenter
-WorkingDirectory=/opt/planningcenter/current
-EnvironmentFile=/opt/planningcenter/shared/.env
-ExecStart=/usr/bin/node /opt/planningcenter/current/node_modules/.bin/next start -p 3000
+User=planning
+Group=planning
+WorkingDirectory=/opt/planning/current
+EnvironmentFile=/opt/planning/shared/.env
+ExecStart=/usr/bin/node /opt/planning/current/node_modules/.bin/next start -p 3000
 Restart=on-failure
 RestartSec=5
 
@@ -154,34 +154,34 @@ Activer et demarrer :
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable planningcenter
-sudo systemctl start planningcenter
+sudo systemctl enable planning
+sudo systemctl start planning
 ```
 
 Commandes utiles :
 
 ```bash
-sudo systemctl status planningcenter    # statut
-sudo journalctl -u planningcenter -f    # logs en temps reel
+sudo systemctl status planning    # statut
+sudo journalctl -u planning -f    # logs en temps reel
 ```
 
 ## Configuration Traefik
 
-Ajouter un fichier de configuration dynamique (ex: `/etc/traefik/dynamic/planningcenter.yml`) :
+Ajouter un fichier de configuration dynamique (ex: `/etc/traefik/dynamic/planning.yml`) :
 
 ```yaml
 http:
   routers:
-    planningcenter:
+    planning:
       rule: "Host(`votre-domaine.com`)"
       entryPoints:
         - websecure
-      service: planningcenter
+      service: planning
       tls:
         certResolver: letsencrypt
 
   services:
-    planningcenter:
+    planning:
       loadBalancer:
         servers:
           - url: "http://127.0.0.1:3000"
@@ -195,13 +195,13 @@ Pour revenir a une release precedente :
 
 ```bash
 # Lister les releases disponibles
-ls /opt/planningcenter/releases/
+ls /opt/planning/releases/
 
 # Repointer le symlink
-ln -sfn /opt/planningcenter/releases/planningcenter-VERSION_PRECEDENTE /opt/planningcenter/current
+ln -sfn /opt/planning/releases/planningcenter-VERSION_PRECEDENTE /opt/planning/current
 
 # Redemarrer
-sudo systemctl restart planningcenter
+sudo systemctl restart planning
 ```
 
 ## OAuth Google en production
