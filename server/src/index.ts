@@ -2,15 +2,12 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
 import passport from "passport";
 
 import { configurePassport } from "./middleware/auth";
 import authRoutes from "./routes/auth";
 import eventsRoutes from "./routes/events";
 import planningRoutes from "./routes/planning";
-
-dotenv.config({ path: "../.env" });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
