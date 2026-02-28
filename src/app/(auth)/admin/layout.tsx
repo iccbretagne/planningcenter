@@ -7,9 +7,11 @@ export default async function AdminLayout({
 }) {
   await requireAnyPermission(
     "members:manage",
+    "members:view",
     "church:manage",
     "users:manage",
-    "departments:manage"
+    "departments:manage",
+    "events:manage"
   );
 
   return <div className="p-6">{children}</div>;

@@ -1,9 +1,14 @@
-import { requirePermission, getUserDepartmentScope } from "@/lib/auth";
+import { requireAnyPermission, getUserDepartmentScope } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import MembersClient from "./MembersClient";
 
 export default async function MembersPage() {
-  const session = await requirePermission("members:manage");
+  const session = await requireAnyPermission("members:manage", "members:view");
+  const userPermissions = new Set(
+    session.user.churchRoles.flatMap((r) => hasPermission(r.role))
+  );
+  const canManage = userPermissions.has("members:manage");
   const scope = getUserDepartmentScope(session);
 
   const churchIds = Array.from(
@@ -52,6 +57,7 @@ export default async function MembersPage() {
           name: d.name,
           ministryName: d.ministry.name,
         }))}
+        readOnly={!canManage}
       />
     </div>
   );

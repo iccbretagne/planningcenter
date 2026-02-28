@@ -6,12 +6,12 @@ import { hasPermission } from "@/lib/permissions";
 import Sidebar from "@/components/Sidebar";
 
 const adminLinks = [
-  { href: "/admin/churches", label: "Églises", permission: "church:manage" },
-  { href: "/admin/users", label: "Utilisateurs", permission: "members:manage" },
-  { href: "/admin/ministries", label: "Ministères", permission: "departments:manage" },
-  { href: "/admin/departments", label: "Départements", permission: "departments:manage" },
-  { href: "/admin/members", label: "Membres", permission: "members:manage" },
-  { href: "/admin/events", label: "Événements", permission: "events:manage" },
+  { href: "/admin/churches", label: "Églises", permissions: ["church:manage"] },
+  { href: "/admin/users", label: "Utilisateurs", permissions: ["members:manage"] },
+  { href: "/admin/ministries", label: "Ministères", permissions: ["departments:manage"] },
+  { href: "/admin/departments", label: "Départements", permissions: ["departments:manage"] },
+  { href: "/admin/members", label: "Membres", permissions: ["members:manage", "members:view"] },
+  { href: "/admin/events", label: "Événements", permissions: ["events:manage"] },
 ];
 
 export default async function AuthLayout({
@@ -59,7 +59,7 @@ export default async function AuthLayout({
   const userRoles = churchRoles.map((r) => r.role);
   const userPermissions = new Set(userRoles.flatMap((r) => hasPermission(r)));
   const visibleAdminLinks = adminLinks
-    .filter((link) => userPermissions.has(link.permission))
+    .filter((link) => link.permissions.some((p) => userPermissions.has(p)))
     .map(({ href, label }) => ({ href, label }));
 
   return (

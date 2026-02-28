@@ -27,6 +27,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     "planning:view",
     "members:view",
     "events:view",
+    "events:manage",
     "departments:view",
   ],
   MINISTER: [

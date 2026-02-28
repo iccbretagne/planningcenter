@@ -22,9 +22,10 @@ interface Member {
 interface Props {
   initialMembers: Member[];
   departments: { id: string; name: string; ministryName: string }[];
+  readOnly?: boolean;
 }
 
-export default function MembersClient({ initialMembers, departments }: Props) {
+export default function MembersClient({ initialMembers, departments, readOnly = false }: Props) {
   const [members, setMembers] = useState(initialMembers);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
@@ -201,7 +202,7 @@ export default function MembersClient({ initialMembers, departments }: Props) {
   return (
     <>
       <div className="mb-4 flex items-center gap-4">
-        <Button onClick={openCreate}>Nouveau membre</Button>
+        {!readOnly && <Button onClick={openCreate}>Nouveau membre</Button>}
         <div className="w-64">
           <Select
             label=""
@@ -232,10 +233,10 @@ export default function MembersClient({ initialMembers, departments }: Props) {
           ]}
           data={filtered}
           emptyMessage="Aucun membre."
-          selectable
+          selectable={!readOnly}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          actions={(m) => (
+          actions={readOnly ? undefined : (m) => (
             <div className="flex gap-2 justify-end">
               <Button variant="secondary" onClick={() => openEdit(m)}>
                 Modifier
