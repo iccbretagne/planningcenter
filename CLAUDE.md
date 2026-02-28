@@ -210,7 +210,7 @@ Chaque eglise (`Church`) est un tenant isole. Les donnees sont rattachees a une 
 ## CI/CD
 
 - **GitHub Actions** (`.github/workflows/ci.yml`) : typecheck sur chaque PR et push main, validation version sur tags
-- **Dependabot** (`.github/dependabot.yml`) : mises a jour hebdomadaires npm + GitHub Actions
+- **Dependabot** (`.github/dependabot.yml`) : mises a jour hebdomadaires npm + GitHub Actions (minor/patch uniquement, majeures ignorées)
 
 ## Documentation
 

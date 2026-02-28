@@ -19,6 +19,7 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Dependabot : mises a jour hebdomadaires npm et GitHub Actions
 - Affichage de la version dans le footer (depuis `package.json`)
 - Script `typecheck` dans package.json
+- Dependabot : ignore les montées de version majeures (npm et GitHub Actions)
 
 ### Corrige
 
