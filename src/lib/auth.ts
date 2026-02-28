@@ -1,8 +1,18 @@
 import NextAuth, { type Session } from "next-auth";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import type { Role } from "@prisma/client";
+
+const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+export function isSuperAdmin(email: string): boolean {
+  return SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
+}
 
 declare module "next-auth" {
   interface Session {
@@ -35,20 +45,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/",
   },
-  events: {
-    async createUser({ user }) {
-      if (!user.email || !user.id) return;
+  callbacks: {
+    async signIn({ user }) {
+      if (!user.email || !user.id) return true;
 
-      const superAdminEmails = (process.env.SUPER_ADMIN_EMAILS || "")
-        .split(",")
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean);
-
-      if (superAdminEmails.includes(user.email.toLowerCase())) {
+      if (isSuperAdmin(user.email)) {
         const churches = await prisma.church.findMany();
         for (const church of churches) {
-          await prisma.userChurchRole.create({
-            data: {
+          await prisma.userChurchRole.upsert({
+            where: {
+              userId_churchId_role: {
+                userId: user.id,
+                churchId: church.id,
+                role: "SUPER_ADMIN",
+              },
+            },
+            update: {},
+            create: {
               userId: user.id,
               churchId: church.id,
               role: "SUPER_ADMIN",
@@ -56,9 +69,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
         }
       }
+
+      return true;
     },
-  },
-  callbacks: {
     async session({ session, user }) {
       session.user.id = user.id;
 
@@ -147,4 +160,20 @@ export function getUserDepartmentScope(session: Session): DepartmentScope {
   );
 
   return { scoped: true, departmentIds };
+}
+
+export async function getCurrentChurchId(
+  session: Session
+): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  const preferred = cookieStore.get("current-church")?.value;
+
+  if (preferred) {
+    const hasAccess = session.user.churchRoles.some(
+      (r) => r.churchId === preferred
+    );
+    if (hasAccess) return preferred;
+  }
+
+  return session.user.churchRoles[0]?.churchId;
 }

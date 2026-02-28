@@ -19,6 +19,7 @@
 - [x] Gestion des membres (ajout, modification, suppression, transfert entre departements)
 - [x] Gestion des evenements (creation, modification, suppression, types personnalises)
 - [x] Association departements-evenements depuis l'interface
+- [ ] Schema dedie Super Admin (role global independant des eglises)
 
 ## Planning
 

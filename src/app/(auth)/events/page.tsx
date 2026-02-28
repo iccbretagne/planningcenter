@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth, getCurrentChurchId } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import EventsPageClient from "./EventsPageClient";
 
@@ -6,7 +6,7 @@ export default async function EventsPage() {
   const session = await auth();
   if (!session?.user) redirect("/");
 
-  const currentChurchId = session.user.churchRoles[0]?.churchId;
+  const currentChurchId = await getCurrentChurchId(session);
 
   if (!currentChurchId) {
     return (
