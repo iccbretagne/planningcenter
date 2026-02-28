@@ -1,3 +1,4 @@
+import pkg from "@/../package.json";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -103,6 +104,18 @@ export default async function AuthLayout({
 
         <main className="flex-1 p-6">{children}</main>
       </div>
+
+      <footer className="py-4 text-center text-xs text-gray-400">
+        <a
+          href="https://github.com/iccbretagne/planningcenter"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-gray-600 transition-colors"
+        >
+          PlanningCenter
+        </a>{" "}
+        <span>v{pkg.version}</span>
+      </footer>
     </div>
   );
 }
