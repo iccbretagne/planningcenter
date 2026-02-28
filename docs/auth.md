@@ -48,6 +48,8 @@ session.user.churchRoles = [
 **Helpers** (`src/lib/auth.ts`) :
 - `requireAuth()` — verifie la session et throw `UNAUTHORIZED` si absente
 - `requirePermission(permission, churchId?)` — verifie une permission specifique et throw `FORBIDDEN` si non autorise
+- `requireAnyPermission(...permissions)` — verifie au moins une permission parmi la liste (utilise par le layout admin)
+- `getUserDepartmentScope(session)` — retourne le perimetre departements selon le role
 
 ---
 
@@ -68,7 +70,7 @@ Un utilisateur peut avoir **plusieurs roles** dans **plusieurs eglises** via la 
 ### Attribution
 
 - **Super Admin** : automatique a la premiere connexion si l'email est dans `SUPER_ADMIN_EMAILS`
-- **Autres roles** : a attribuer manuellement en base (interface d'admin a developper)
+- **Autres roles** : via l'interface admin (`/admin/users`), avec affectation optionnelle de ministere (MINISTER) ou departements (DEPARTMENT_HEAD)
 
 ---
 
@@ -81,7 +83,7 @@ Matrice role-permissions definie dans `src/lib/permissions.ts` :
 | `planning:view` | x | x | x | x | x |
 | `planning:edit` | x | x | x | x | x |
 | `members:view` | x | x | x | x | x |
-| `members:manage` | x | x | | | |
+| `members:manage` | x | x | | x | x |
 | `events:view` | x | x | x | x | x |
 | `events:manage` | x | x | | | |
 | `departments:view` | x | x | x | x | x |

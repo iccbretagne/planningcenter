@@ -2,22 +2,23 @@
 
 ## Interface utilisateur
 
-- [ ] Composants UI partages (Button, Card, Input, Modal)
-- [ ] Sidebar : highlight du departement selectionne (active state)
+- [x] Composants UI partages (Button, Card, Input, Modal, Select, DataTable, CheckboxGroup)
+- [x] Sidebar : highlight du departement selectionne (active state)
 - [ ] Responsive mobile (sidebar collapsible, grille adaptee)
-- [ ] Theme ICC (couleurs `icc-blue`, `icc-gold` definies dans `globals.css`)
+- [x] Theme ICC (couleurs `icc-violet`, `icc-jaune`, `icc-rouge`, `icc-bleu`)
 - [ ] Indicateurs visuels des statuts dans la sidebar (compteurs en service / indispo)
 - [ ] Vue recapitulative multi-departements pour un evenement
 
 ## Administration
 
-- [ ] Page Super Admin : liste des eglises, creation, suppression
+- [x] Page Super Admin : liste des eglises, creation, suppression
 - [ ] Onboarding nouvelle eglise (creation + invitation admin)
-- [ ] Gestion des utilisateurs : attribution des roles depuis l'interface
-- [ ] Gestion des ministeres et departements (CRUD)
-- [ ] Gestion des membres (ajout, modification, suppression, transfert entre departements)
-- [ ] Gestion des evenements (creation, modification, suppression, types personnalises)
-- [ ] Association departements-evenements depuis l'interface
+- [x] Gestion des utilisateurs : attribution des roles depuis l'interface
+- [x] Affectation ministere/departements aux roles MINISTER et DEPARTMENT_HEAD
+- [x] Gestion des ministeres et departements (CRUD)
+- [x] Gestion des membres (ajout, modification, suppression, transfert entre departements)
+- [x] Gestion des evenements (creation, modification, suppression, types personnalises)
+- [x] Association departements-evenements depuis l'interface
 
 ## Planning
 
@@ -25,7 +26,7 @@
 - [ ] Duplication d'un planning d'un evenement a un autre
 - [ ] Historique des modifications (audit log)
 - [ ] Verrouillage du planning apres validation
-- [ ] Export PDF du planning par evenement / departement
+- [x] Export PDF du planning par evenement / departement
 
 ## Notifications
 
@@ -43,7 +44,9 @@
 
 - [ ] Tests unitaires (Vitest)
 - [ ] Tests d'integration API
-- [ ] CI/CD (GitHub Actions : lint, test, build)
+- [x] CI/CD (GitHub Actions : typecheck, version check)
+- [x] Dependabot (mises a jour automatiques des dependances)
+- [x] Affichage de la version dans le footer
 - [ ] Deploiement production (Docker multi-stage + reverse proxy)
 - [ ] Migrations Prisma (remplacer `db push` par `prisma migrate`)
 - [ ] PWA (manifest, service worker, installation mobile)

@@ -17,6 +17,9 @@
 
 ```
 planningcenter/
+├── .github/
+│   ├── workflows/ci.yml           # CI : typecheck + version check
+│   └── dependabot.yml             # Mises a jour automatiques des dependances
 ├── prisma/
 │   ├── schema.prisma              # Schema BDD (domaine + NextAuth)
 │   └── seed.ts                    # Donnees initiales ICC Rennes
@@ -26,21 +29,43 @@ planningcenter/
 │   │   ├── page.tsx               # Page de connexion (Google OAuth)
 │   │   ├── globals.css            # Tailwind v4 (@theme couleurs ICC)
 │   │   ├── (auth)/                # Route group : pages authentifiees
-│   │   │   ├── layout.tsx         # Auth guard + header + sidebar
-│   │   │   └── dashboard/
-│   │   │       └── page.tsx       # Vue planning par departement
+│   │   │   ├── layout.tsx         # Auth guard, header, sidebar, footer version
+│   │   │   ├── dashboard/         # Vue planning par departement
+│   │   │   ├── events/            # Gestion des evenements
+│   │   │   └── admin/             # Section administration
+│   │   │       ├── layout.tsx     # Guard multi-permissions
+│   │   │       ├── churches/      # CRUD eglises
+│   │   │       ├── users/         # Gestion utilisateurs et roles
+│   │   │       ├── ministries/    # CRUD ministeres
+│   │   │       ├── departments/   # CRUD departements
+│   │   │       ├── members/       # CRUD membres
+│   │   │       └── events/        # CRUD evenements
 │   │   └── api/                   # Route handlers (API REST)
-│   │       ├── auth/[...nextauth]/route.ts
-│   │       ├── churches/[churchId]/events/route.ts
-│   │       ├── events/[eventId]/route.ts
-│   │       ├── departments/[departmentId]/members/route.ts
-│   │       └── events/[eventId]/departments/[deptId]/planning/route.ts
+│   │       ├── auth/[...nextauth]/
+│   │       ├── churches/
+│   │       ├── departments/
+│   │       ├── events/
+│   │       ├── members/
+│   │       ├── ministries/
+│   │       └── users/
 │   ├── components/
-│   │   ├── EventSelector.tsx      # Selecteur d'evenement (client)
-│   │   └── PlanningGrid.tsx       # Grille planning interactive (client)
+│   │   ├── Sidebar.tsx            # Sidebar unifiee (3 sections accordion)
+│   │   ├── PlanningGrid.tsx       # Grille planning interactive (auto-save)
+│   │   ├── EventSelector.tsx      # Selecteur d'evenement
+│   │   ├── MonthlyPlanningView.tsx
+│   │   ├── ViewToggle.tsx
+│   │   ├── DashboardActions.tsx
+│   │   └── ui/                    # Composants UI reutilisables
+│   │       ├── Button.tsx
+│   │       ├── Input.tsx
+│   │       ├── Select.tsx
+│   │       ├── Modal.tsx
+│   │       ├── DataTable.tsx
+│   │       ├── CheckboxGroup.tsx
+│   │       └── BulkActionBar.tsx
 │   ├── lib/
 │   │   ├── prisma.ts              # Singleton Prisma (globalThis pattern)
-│   │   ├── auth.ts                # Config NextAuth + helpers (requireAuth, requirePermission)
+│   │   ├── auth.ts                # Config NextAuth + helpers
 │   │   ├── api-utils.ts           # ApiError, successResponse, errorResponse
 │   │   └── permissions.ts         # Matrice roles-permissions RBAC
 │   └── middleware.ts              # Edge middleware (protection routes)
@@ -78,6 +103,13 @@ export async function GET(request, { params }) {
 
 Les erreurs metier utilisent `throw new ApiError(statusCode, message)`.
 Les erreurs d'auth (`UNAUTHORIZED`, `FORBIDDEN`) sont gerees automatiquement par `errorResponse`.
+
+### Helpers d'authentification (`src/lib/auth.ts`)
+
+- `requireAuth()` — verifie la session, throw `UNAUTHORIZED`
+- `requirePermission(permission, churchId?)` — verifie une permission, throw `FORBIDDEN`
+- `requireAnyPermission(...permissions)` — verifie au moins une permission parmi la liste
+- `getUserDepartmentScope(session)` — retourne `{ scoped: false }` (admin) ou `{ scoped: true, departmentIds }` (roles limites)
 
 ### Validation
 

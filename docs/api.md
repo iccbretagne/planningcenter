@@ -195,3 +195,60 @@ Valeurs possibles pour `status` : `"EN_SERVICE"`, `"EN_SERVICE_DEBRIEF"`, `"INDI
 **Erreurs** :
 - `400` si plus d'un `EN_SERVICE_DEBRIEF`
 - `400` si le body ne passe pas la validation Zod
+
+---
+
+## Utilisateurs et roles
+
+### `POST /api/users/[userId]/roles`
+
+Ajoute un role a un utilisateur.
+
+**Body** :
+```json
+{
+  "churchId": "clx...",
+  "role": "MINISTER",
+  "ministryId": "clx...",
+  "departmentIds": ["clx...", "clx..."]
+}
+```
+
+- `ministryId` : optionnel, utilise si `role` = `MINISTER`
+- `departmentIds` : optionnel, utilise si `role` = `DEPARTMENT_HEAD`
+
+**Reponse** : `201` avec le role cree (inclut `church`, `ministry`, `departments`).
+
+### `PATCH /api/users/[userId]/roles`
+
+Modifie l'affectation d'un role existant (ministere ou departements).
+
+**Body** :
+```json
+{
+  "roleId": "clx...",
+  "ministryId": "clx...",
+  "departmentIds": ["clx...", "clx..."]
+}
+```
+
+- `ministryId` : `string | null` pour MINISTER
+- `departmentIds` : `string[]` pour DEPARTMENT_HEAD (remplace les assignations existantes)
+
+**Reponse** : `200` avec le role mis a jour.
+
+**Erreur** : `404` si le role n'appartient pas a l'utilisateur.
+
+### `DELETE /api/users/[userId]/roles`
+
+Supprime un role d'un utilisateur. Supprime en cascade les `UserDepartment` associes.
+
+**Body** :
+```json
+{
+  "churchId": "clx...",
+  "role": "DEPARTMENT_HEAD"
+}
+```
+
+**Reponse** : `200` avec `{ "success": true }`.

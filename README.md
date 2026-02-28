@@ -29,6 +29,7 @@ npm run dev                    # http://localhost:3000
 | `npm run dev` | Developpement (Turbopack) |
 | `npm run build` | Build de production |
 | `npm run start` | Production |
+| `npm run typecheck` | Verification TypeScript |
 | `npm run db:push` | Appliquer le schema Prisma |
 | `npm run db:seed` | Charger les donnees ICC Rennes |
 
@@ -40,10 +41,12 @@ Next.js 15 &middot; React 19 &middot; Tailwind CSS v4 &middot; NextAuth v5 &midd
 
 | Document | Contenu |
 |---|---|
+| [CLAUDE.md](CLAUDE.md) | Contexte complet pour les agents IA |
 | [Architecture](docs/architecture.md) | Structure du projet, patterns, conventions |
 | [Base de donnees](docs/database.md) | Schema Prisma, modeles, relations |
 | [API](docs/api.md) | Endpoints, requetes, reponses |
 | [Authentification & roles](docs/auth.md) | NextAuth, OAuth, RBAC, permissions |
+| [Changelog](CHANGELOG.md) | Historique des modifications |
 
 ## Reste a faire
 
