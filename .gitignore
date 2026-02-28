@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.env
+
+# Next.js
+.next/
+
+# Prisma
+prisma/generated/
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
