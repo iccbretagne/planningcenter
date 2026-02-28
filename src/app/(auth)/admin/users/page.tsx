@@ -15,7 +15,13 @@ export default async function UsersPage() {
       : { churchRoles: { some: { churchId: { in: churchIds } } } },
     include: {
       churchRoles: {
-        include: { church: { select: { id: true, name: true } } },
+        include: {
+          church: { select: { id: true, name: true } },
+          ministry: { select: { id: true, name: true } },
+          departments: {
+            include: { department: { select: { id: true, name: true } } },
+          },
+        },
       },
     },
     orderBy: { name: "asc" },
@@ -28,6 +34,20 @@ export default async function UsersPage() {
   const uniqueChurches = Array.from(
     new Map(churches.map((c) => [c.id, c])).values()
   );
+
+  const whereChurch = isSuperAdmin ? {} : { churchId: { in: churchIds } };
+
+  const ministries = await prisma.ministry.findMany({
+    where: whereChurch,
+    select: { id: true, name: true, churchId: true },
+    orderBy: { name: "asc" },
+  });
+
+  const departments = await prisma.department.findMany({
+    where: { ministry: whereChurch },
+    select: { id: true, name: true, ministry: { select: { churchId: true } } },
+    orderBy: { name: "asc" },
+  });
 
   const canManageRoles = isSuperAdmin || churchRoles.some((r) => r.role === "ADMIN");
 
@@ -44,9 +64,17 @@ export default async function UsersPage() {
             id: r.id,
             role: r.role,
             church: r.church,
+            ministry: r.ministry,
+            departments: r.departments.map((d) => d.department),
           })),
         }))}
         churches={uniqueChurches.map((c) => ({ id: c.id, name: c.name }))}
+        ministries={ministries}
+        departments={departments.map((d) => ({
+          id: d.id,
+          name: d.name,
+          churchId: d.ministry.churchId,
+        }))}
         canManageRoles={canManageRoles}
         isSuperAdmin={isSuperAdmin}
       />

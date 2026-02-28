@@ -5,12 +5,12 @@ import { hasPermission } from "@/lib/permissions";
 import Sidebar from "@/components/Sidebar";
 
 const adminLinks = [
-  { href: "/admin/churches", label: "Eglises", permission: "church:manage" },
+  { href: "/admin/churches", label: "Églises", permission: "church:manage" },
   { href: "/admin/users", label: "Utilisateurs", permission: "members:manage" },
-  { href: "/admin/ministries", label: "Ministeres", permission: "members:manage" },
-  { href: "/admin/departments", label: "Departements", permission: "members:manage" },
+  { href: "/admin/ministries", label: "Ministères", permission: "departments:manage" },
+  { href: "/admin/departments", label: "Départements", permission: "departments:manage" },
   { href: "/admin/members", label: "Membres", permission: "members:manage" },
-  { href: "/admin/events", label: "Evenements", permission: "members:manage" },
+  { href: "/admin/events", label: "Événements", permission: "events:manage" },
 ];
 
 export default async function AuthLayout({
@@ -26,7 +26,7 @@ export default async function AuthLayout({
 
   const churchRoles = session.user.churchRoles;
   const currentChurchId = churchRoles[0]?.churchId;
-  const churchName = churchRoles[0]?.church?.name || "Eglise";
+  const churchName = churchRoles[0]?.church?.name || "Église";
 
   // Get departments the user has access to
   const userDepartmentIds = churchRoles
@@ -88,7 +88,7 @@ export default async function AuthLayout({
                 type="submit"
                 className="px-3 py-1 text-sm text-white/80 border border-white/30 rounded-md hover:bg-white/10 transition-colors"
               >
-                Deconnexion
+                Déconnexion
               </button>
             </form>
           </div>
