@@ -179,7 +179,7 @@ Style coherent : border-2, rounded-lg, focus:ring-icc-violet. Voir les composant
 | `members:view` | x | x | x | x | x |
 | `members:manage` | x | x | | x | x |
 | `events:view` | x | x | x | x | x |
-| `events:manage` | x | x | | | |
+| `events:manage` | x | x | x | | |
 | `departments:view` | x | x | x | x | x |
 | `departments:manage` | x | x | | | |
 | `church:manage` | x | | | | |
@@ -190,7 +190,11 @@ Style coherent : border-2, rounded-lg, focus:ring-icc-violet. Voir les composant
 - Ministre : départements du ministère assigné
 - Responsable de département : départements assignés via `user_departments`
 
-**Note** : le Secrétaire a un accès en lecture seule (pas de `planning:edit` ni `members:manage`).
+**Spécificités du Secrétaire** :
+- Voit tous les départements de son église (même périmètre que Admin)
+- Planning en lecture seule (pas de `planning:edit`)
+- Membres en lecture seule dans l'admin (pas de `members:manage`)
+- Peut gérer les événements (`events:manage`)
 
 ## Multi-tenant
 

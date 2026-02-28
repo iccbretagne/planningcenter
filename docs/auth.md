@@ -85,13 +85,17 @@ Matrice role-permissions definie dans `src/lib/permissions.ts` :
 | `members:view` | x | x | x | x | x |
 | `members:manage` | x | x | | x | x |
 | `events:view` | x | x | x | x | x |
-| `events:manage` | x | x | | | |
+| `events:manage` | x | x | x | | |
 | `departments:view` | x | x | x | x | x |
 | `departments:manage` | x | x | | | |
 | `church:manage` | x | | | | |
 | `users:manage` | x | | | | |
 
-**Note** : le Secrétaire a un accès en lecture seule sur l'ensemble des départements de son église (pas de `planning:edit` ni `members:manage`).
+**Spécificités du Secrétaire** :
+- Voit tous les départements de son église (même périmètre que Admin)
+- Planning en lecture seule (pas de `planning:edit`)
+- Membres en lecture seule dans l'admin (pas de `members:manage`)
+- Peut gérer les événements (`events:manage`)
 
 ### Utilisation dans le code
 
