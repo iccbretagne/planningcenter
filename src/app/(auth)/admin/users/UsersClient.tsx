@@ -14,6 +14,10 @@ const ROLES = [
   { value: "DEPARTMENT_HEAD", label: "Responsable de département" },
 ];
 
+const ROLE_LABELS: Record<string, string> = Object.fromEntries(
+  ROLES.map((r) => [r.value, r.label])
+);
+
 interface UserRole {
   id: string;
   role: string;
@@ -222,7 +226,7 @@ export default function UsersClient({
     churchId: string,
     role: string
   ) {
-    if (!confirm(`Supprimer le rôle ${role} ?`)) return;
+    if (!confirm(`Supprimer le rôle ${ROLE_LABELS[role] || role} ?`)) return;
 
     try {
       const res = await fetch(`/api/users/${userId}/roles`, {
@@ -255,7 +259,8 @@ export default function UsersClient({
   }
 
   function formatRoleBadge(r: UserRole) {
-    let label = `${r.role} - ${r.church.name}`;
+    const roleLabel = ROLE_LABELS[r.role] || r.role;
+    let label = `${roleLabel} - ${r.church.name}`;
     if (r.role === "MINISTER" && r.ministry) {
       label += ` (${r.ministry.name})`;
     }
@@ -305,7 +310,7 @@ export default function UsersClient({
                 {user.churchRoles.map((r) => (
                   <span
                     key={r.id}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs text-gray-700"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 rounded-md text-sm text-gray-700"
                   >
                     {formatRoleBadge(r)}
                     {canManageRoles &&
@@ -313,10 +318,12 @@ export default function UsersClient({
                         r.role === "DEPARTMENT_HEAD") && (
                         <button
                           onClick={() => openEditAssignment(user.id, r)}
-                          className="ml-1 text-gray-500 hover:text-icc-violet"
+                          className="ml-1 p-0.5 rounded text-icc-violet hover:bg-icc-violet hover:text-white transition-colors"
                           title="Modifier l'affectation"
                         >
-                          &#9998;
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
                         </button>
                       )}
                     {canManageRoles && (
@@ -324,9 +331,12 @@ export default function UsersClient({
                         onClick={() =>
                           handleRemoveRole(user.id, r.church.id, r.role)
                         }
-                        className="ml-1 text-red-500 hover:text-red-700"
+                        className="ml-0.5 p-0.5 rounded text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                        title="Supprimer le rôle"
                       >
-                        &times;
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     )}
                   </span>

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, requirePermission } from "@/lib/auth";
 import {
   successResponse,
   errorResponse,
@@ -70,7 +70,7 @@ export async function PUT(
   }: { params: Promise<{ eventId: string; deptId: string }> }
 ) {
   try {
-    await requireAuth();
+    await requirePermission("planning:edit");
     const { eventId, deptId: departmentId } = await params;
 
     const body = await request.json();

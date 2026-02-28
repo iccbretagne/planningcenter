@@ -13,6 +13,7 @@ interface MemberPlanning {
 interface PlanningGridProps {
   eventId: string;
   departmentId: string;
+  readOnly?: boolean;
 }
 
 const STATUS_OPTIONS = [
@@ -42,6 +43,7 @@ const STATUS_OPTIONS = [
 export default function PlanningGrid({
   eventId,
   departmentId,
+  readOnly = false,
 }: PlanningGridProps) {
   const [members, setMembers] = useState<MemberPlanning[]>([]);
   const [loading, setLoading] = useState(true);
@@ -147,13 +149,16 @@ export default function PlanningGrid({
           En service : {enService}/{members.length}
         </span>
         <span className="text-red-700">Indisponibles : {indisponible}</span>
-        {saving && <span className="text-blue-500">Enregistrement...</span>}
-        {dirty && !saving && (
+        {readOnly && (
+          <span className="text-gray-400 italic">Lecture seule</span>
+        )}
+        {!readOnly && saving && <span className="text-blue-500">Enregistrement...</span>}
+        {!readOnly && dirty && !saving && (
           <span className="text-orange-500">
             Modifications non sauvegardees
           </span>
         )}
-        {!dirty && !saving && (
+        {!readOnly && !dirty && !saving && (
           <span className="text-green-500">Sauvegarde</span>
         )}
       </div>
@@ -182,13 +187,16 @@ export default function PlanningGrid({
                       <button
                         key={option.value || "none"}
                         onClick={() =>
-                          handleStatusChange(member.id, option.value)
+                          !readOnly && handleStatusChange(member.id, option.value)
                         }
+                        disabled={readOnly}
                         className={`px-2 py-1 text-xs rounded-md transition-colors ${
                           member.status === option.value
                             ? option.color +
                               " font-semibold ring-2 ring-offset-1 ring-blue-400"
-                            : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                            : readOnly
+                              ? "bg-gray-50 text-gray-300 cursor-not-allowed"
+                              : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                         }`}
                       >
                         {option.label}

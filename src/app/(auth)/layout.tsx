@@ -42,7 +42,7 @@ export default async function AuthLayout({
   const isAdmin = churchRoles.some(
     (r) =>
       r.churchId === currentChurchId &&
-      (r.role === "SUPER_ADMIN" || r.role === "ADMIN")
+      (r.role === "SUPER_ADMIN" || r.role === "ADMIN" || r.role === "SECRETARY")
   );
 
   let allDepartments = departments;

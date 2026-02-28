@@ -127,7 +127,7 @@ type DepartmentScope =
   | { scoped: false }
   | { scoped: true; departmentIds: string[] };
 
-const GLOBAL_ROLES: Role[] = ["SUPER_ADMIN", "ADMIN"];
+const GLOBAL_ROLES: Role[] = ["SUPER_ADMIN", "ADMIN", "SECRETARY"];
 
 export function getUserDepartmentScope(session: Session): DepartmentScope {
   const hasGlobalRole = session.user.churchRoles.some((r) =>

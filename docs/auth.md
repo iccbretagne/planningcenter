@@ -78,10 +78,10 @@ Un utilisateur peut avoir **plusieurs roles** dans **plusieurs eglises** via la 
 
 Matrice role-permissions definie dans `src/lib/permissions.ts` :
 
-| Permission | Super Admin | Admin | Secretary | Minister | Dept Head |
+| Permission | Super Admin | Admin | Secrétaire | Ministre | Resp. département |
 |---|---|---|---|---|---|
 | `planning:view` | x | x | x | x | x |
-| `planning:edit` | x | x | x | x | x |
+| `planning:edit` | x | x | | x | x |
 | `members:view` | x | x | x | x | x |
 | `members:manage` | x | x | | x | x |
 | `events:view` | x | x | x | x | x |
@@ -90,6 +90,8 @@ Matrice role-permissions definie dans `src/lib/permissions.ts` :
 | `departments:manage` | x | x | | | |
 | `church:manage` | x | | | | |
 | `users:manage` | x | | | | |
+
+**Note** : le Secrétaire a un accès en lecture seule sur l'ensemble des départements de son église (pas de `planning:edit` ni `members:manage`).
 
 ### Utilisation dans le code
 
@@ -109,7 +111,8 @@ export async function DELETE(request, { params }) {
 
 ### Visibilite des departements
 
-- **Super Admin / Admin** : voient tous les departements de leur eglise
-- **Autres roles** : voient uniquement les departements qui leur sont assignes via `user_departments`
+- **Super Admin / Admin / Secrétaire** : voient tous les départements de leur église (lecture globale)
+- **Ministre** : voit les départements du ministère qui lui est assigné
+- **Responsable de département** : voit uniquement les départements qui lui sont assignés via `user_departments`
 
-Cette logique est implementee dans `src/app/(auth)/layout.tsx`.
+Cette logique est implémentée dans `src/app/(auth)/layout.tsx` et `getUserDepartmentScope()` dans `src/lib/auth.ts`.

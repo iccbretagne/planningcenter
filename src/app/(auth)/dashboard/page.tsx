@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import EventSelector from "@/components/EventSelector";
@@ -21,6 +22,10 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
   } = await searchParams;
 
   const currentChurchId = session.user.churchRoles[0]?.churchId;
+  const userPermissions = new Set(
+    session.user.churchRoles.flatMap((r) => hasPermission(r.role))
+  );
+  const canEditPlanning = userPermissions.has("planning:edit");
 
   if (!currentChurchId) {
     return (
@@ -74,7 +79,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
           </div>
         )
       ) : selectedEventId && selectedDeptId ? (
-        <PlanningGrid eventId={selectedEventId} departmentId={selectedDeptId} />
+        <PlanningGrid eventId={selectedEventId} departmentId={selectedDeptId} readOnly={!canEditPlanning} />
       ) : (
         <div className="p-8 text-center text-gray-400 border-2 border-gray-200 border-dashed rounded-lg">
           {!selectedDeptId

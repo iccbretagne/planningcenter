@@ -172,10 +172,10 @@ Style coherent : border-2, rounded-lg, focus:ring-icc-violet. Voir les composant
 
 ## Roles et permissions
 
-| Permission | Super Admin | Admin | Secretary | Minister | Dept Head |
+| Permission | Super Admin | Admin | Secrétaire | Ministre | Resp. département |
 |---|---|---|---|---|---|
 | `planning:view` | x | x | x | x | x |
-| `planning:edit` | x | x | x | x | x |
+| `planning:edit` | x | x | | x | x |
 | `members:view` | x | x | x | x | x |
 | `members:manage` | x | x | | x | x |
 | `events:view` | x | x | x | x | x |
@@ -186,9 +186,11 @@ Style coherent : border-2, rounded-lg, focus:ring-icc-violet. Voir les composant
 | `users:manage` | x | | | | |
 
 **Visibilite des departements** :
-- Super Admin / Admin : tous les departements de l'eglise
-- Minister : departements du ministere assigne
-- Department Head : departements assignes via `user_departments`
+- Super Admin / Admin / Secrétaire : tous les départements de l'église (lecture globale)
+- Ministre : départements du ministère assigné
+- Responsable de département : départements assignés via `user_departments`
+
+**Note** : le Secrétaire a un accès en lecture seule (pas de `planning:edit` ni `members:manage`).
 
 ## Multi-tenant
 
