@@ -35,9 +35,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/",
   },
-  events: {
-    async createUser({ user }) {
-      if (!user.email || !user.id) return;
+  callbacks: {
+    async signIn({ user }) {
+      if (!user.email || !user.id) return true;
 
       const superAdminEmails = (process.env.SUPER_ADMIN_EMAILS || "")
         .split(",")
@@ -47,8 +47,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (superAdminEmails.includes(user.email.toLowerCase())) {
         const churches = await prisma.church.findMany();
         for (const church of churches) {
-          await prisma.userChurchRole.create({
-            data: {
+          await prisma.userChurchRole.upsert({
+            where: {
+              userId_churchId_role: {
+                userId: user.id,
+                churchId: church.id,
+                role: "SUPER_ADMIN",
+              },
+            },
+            update: {},
+            create: {
               userId: user.id,
               churchId: church.id,
               role: "SUPER_ADMIN",
@@ -56,9 +64,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
         }
       }
+
+      return true;
     },
-  },
-  callbacks: {
     async session({ session, user }) {
       session.user.id = user.id;
 
