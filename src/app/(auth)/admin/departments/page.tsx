@@ -30,7 +30,7 @@ export default async function DepartmentsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Departements</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Départements</h1>
       <DepartmentsClient
         initialDepartments={departments}
         ministries={ministries.map((m) => ({

@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { requirePermission } from "@/lib/auth";
+import { requirePermission, getUserDepartmentScope } from "@/lib/auth";
 import { successResponse, errorResponse, ApiError } from "@/lib/api-utils";
 import { z } from "zod";
 
 const updateSchema = z.object({
-  firstName: z.string().min(1, "Le prenom est requis"),
+  firstName: z.string().min(1, "Le prénom est requis"),
   lastName: z.string().min(1, "Le nom est requis"),
-  departmentId: z.string().min(1, "Le departement est requis"),
+  departmentId: z.string().min(1, "Le département est requis"),
 });
 
 export async function PUT(
@@ -14,10 +14,30 @@ export async function PUT(
   { params }: { params: Promise<{ memberId: string }> }
 ) {
   try {
-    await requirePermission("members:manage");
+    const session = await requirePermission("members:manage");
+    const scope = getUserDepartmentScope(session);
     const { memberId } = await params;
     const body = await request.json();
     const data = updateSchema.parse(body);
+
+    if (scope.scoped) {
+      const existing = await prisma.member.findUnique({
+        where: { id: memberId },
+        select: { departmentId: true },
+      });
+
+      if (!existing) {
+        throw new ApiError(404, "Membre introuvable");
+      }
+
+      if (!scope.departmentIds.includes(existing.departmentId)) {
+        throw new ApiError(403, "Ce membre est hors de votre périmètre");
+      }
+
+      if (!scope.departmentIds.includes(data.departmentId)) {
+        throw new ApiError(403, "Département cible non autorisé");
+      }
+    }
 
     const member = await prisma.member.update({
       where: { id: memberId },
@@ -44,15 +64,21 @@ export async function DELETE(
   { params }: { params: Promise<{ memberId: string }> }
 ) {
   try {
-    await requirePermission("members:manage");
+    const session = await requirePermission("members:manage");
+    const scope = getUserDepartmentScope(session);
     const { memberId } = await params;
 
     const member = await prisma.member.findUnique({
       where: { id: memberId },
+      select: { id: true, departmentId: true },
     });
 
     if (!member) {
       throw new ApiError(404, "Membre introuvable");
+    }
+
+    if (scope.scoped && !scope.departmentIds.includes(member.departmentId)) {
+      throw new ApiError(403, "Ce membre est hors de votre périmètre");
     }
 
     await prisma.member.delete({ where: { id: memberId } });

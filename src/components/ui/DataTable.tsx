@@ -21,7 +21,7 @@ export default function DataTable<T extends { id: string }>({
   columns,
   data,
   actions,
-  emptyMessage = "Aucune donnee.",
+  emptyMessage = "Aucune donnée.",
   selectable = false,
   selectedIds,
   onSelectionChange,

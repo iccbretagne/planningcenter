@@ -25,7 +25,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
   if (!currentChurchId) {
     return (
       <div className="p-8 text-center text-gray-400 border-2 border-gray-200 border-dashed rounded-lg">
-        Vous n&apos;etes assigne a aucune eglise.
+        Vous n&apos;êtes assigné à aucune église.
       </div>
     );
   }
@@ -70,7 +70,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
           <MonthlyPlanningView departmentId={selectedDeptId} />
         ) : (
           <div className="p-8 text-center text-gray-400 border-2 border-gray-200 border-dashed rounded-lg">
-            Selectionnez un departement dans la barre laterale
+            Sélectionnez un département dans la barre latérale
           </div>
         )
       ) : selectedEventId && selectedDeptId ? (
@@ -78,8 +78,8 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
       ) : (
         <div className="p-8 text-center text-gray-400 border-2 border-gray-200 border-dashed rounded-lg">
           {!selectedDeptId
-            ? "Selectionnez un departement dans la barre laterale"
-            : "Selectionnez un evenement ci-dessus"}
+            ? "Sélectionnez un département dans la barre latérale"
+            : "Sélectionnez un événement ci-dessus"}
         </div>
       )}
     </div>

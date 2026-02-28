@@ -14,7 +14,7 @@ export default async function ChurchesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Eglises</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Églises</h1>
       <ChurchesClient
         initialChurches={churches.map((c) => ({
           ...c,

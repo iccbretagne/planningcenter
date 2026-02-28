@@ -98,7 +98,7 @@ export default function DepartmentsClient({
   }
 
   async function handleDelete(d: Department) {
-    if (!confirm(`Supprimer le departement "${d.name}" ?`)) return;
+    if (!confirm(`Supprimer le département "${d.name}" ?`)) return;
 
     try {
       const res = await fetch(`/api/departments/${d.id}`, {
@@ -116,7 +116,7 @@ export default function DepartmentsClient({
   }
 
   async function handleBulkDelete() {
-    if (!confirm(`Supprimer ${selectedIds.size} departement(s) ?`)) return;
+    if (!confirm(`Supprimer ${selectedIds.size} département(s) ?`)) return;
 
     try {
       const res = await fetch("/api/departments", {
@@ -192,7 +192,7 @@ export default function DepartmentsClient({
   return (
     <>
       <div className="mb-4">
-        <Button onClick={openCreate}>Nouveau departement</Button>
+        <Button onClick={openCreate}>Nouveau département</Button>
       </div>
 
       <div className="bg-white rounded-lg shadow">
@@ -200,7 +200,7 @@ export default function DepartmentsClient({
           columns={[
             { header: "Nom", accessor: "name" },
             {
-              header: "Ministere",
+              header: "Ministère",
               accessor: (d: Department) => d.ministry.name,
             },
             {
@@ -209,7 +209,7 @@ export default function DepartmentsClient({
             },
           ]}
           data={departments}
-          emptyMessage="Aucun departement."
+          emptyMessage="Aucun département."
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
@@ -236,7 +236,7 @@ export default function DepartmentsClient({
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? "Modifier le departement" : "Nouveau departement"}
+        title={editing ? "Modifier le département" : "Nouveau département"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -247,7 +247,7 @@ export default function DepartmentsClient({
           />
           {!editing && (
             <Select
-              label="Ministere"
+              label="Ministère"
               value={ministryId}
               onChange={(e) => setMinistryId(e.target.value)}
               options={ministries.map((m) => ({
@@ -275,10 +275,10 @@ export default function DepartmentsClient({
       <Modal
         open={bulkModalOpen}
         onClose={() => setBulkModalOpen(false)}
-        title={`Modifier ${selectedIds.size} departement(s)`}
+        title={`Modifier ${selectedIds.size} département(s)`}
       >
         <p className="text-sm text-gray-500 mb-4">
-          Seuls les champs remplis seront modifies.
+          Seuls les champs remplis seront modifiés.
         </p>
         <form onSubmit={handleBulkEdit} className="space-y-4">
           <Input
@@ -288,7 +288,7 @@ export default function DepartmentsClient({
             placeholder="Laisser vide pour ne pas modifier"
           />
           <Select
-            label="Ministere"
+            label="Ministère"
             value={bulkMinistryId}
             onChange={(e) => setBulkMinistryId(e.target.value)}
             placeholder="Ne pas modifier"

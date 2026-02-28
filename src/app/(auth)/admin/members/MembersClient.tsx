@@ -207,7 +207,7 @@ export default function MembersClient({ initialMembers, departments }: Props) {
             label=""
             value={filterDept}
             onChange={(e) => setFilterDept(e.target.value)}
-            placeholder="Tous les departements"
+            placeholder="Tous les départements"
             options={departments.map((d) => ({
               value: d.id,
               label: `${d.name} (${d.ministryName})`,
@@ -220,13 +220,13 @@ export default function MembersClient({ initialMembers, departments }: Props) {
         <DataTable
           columns={[
             { header: "Nom", accessor: "lastName" },
-            { header: "Prenom", accessor: "firstName" },
+            { header: "Prénom", accessor: "firstName" },
             {
-              header: "Departement",
+              header: "Département",
               accessor: (m: Member) => m.department.name,
             },
             {
-              header: "Ministere",
+              header: "Ministère",
               accessor: (m: Member) => m.department.ministry.name,
             },
           ]}
@@ -262,7 +262,7 @@ export default function MembersClient({ initialMembers, departments }: Props) {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Prenom"
+            label="Prénom"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
@@ -274,7 +274,7 @@ export default function MembersClient({ initialMembers, departments }: Props) {
             required
           />
           <Select
-            label="Departement"
+            label="Département"
             value={departmentId}
             onChange={(e) => setDepartmentId(e.target.value)}
             options={departments.map((d) => ({
@@ -304,11 +304,11 @@ export default function MembersClient({ initialMembers, departments }: Props) {
         title={`Modifier ${selectedIds.size} membre(s)`}
       >
         <p className="text-sm text-gray-500 mb-4">
-          Seuls les champs remplis seront modifies.
+          Seuls les champs remplis seront modifiés.
         </p>
         <form onSubmit={handleBulkEdit} className="space-y-4">
           <Input
-            label="Prenom"
+            label="Prénom"
             value={bulkFirstName}
             onChange={(e) => setBulkFirstName(e.target.value)}
             placeholder="Laisser vide pour ne pas modifier"
@@ -320,7 +320,7 @@ export default function MembersClient({ initialMembers, departments }: Props) {
             placeholder="Laisser vide pour ne pas modifier"
           />
           <Select
-            label="Departement"
+            label="Département"
             value={bulkDepartmentId}
             onChange={(e) => setBulkDepartmentId(e.target.value)}
             placeholder="Ne pas modifier"

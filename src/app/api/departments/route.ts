@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
     }
 
     if (!data || Object.keys(data).length === 0) {
-      return errorResponse(new Error("Aucune donnee a mettre a jour"));
+      return errorResponse(new Error("Aucune donnée à mettre à jour"));
     }
 
     await prisma.department.updateMany({
@@ -77,7 +77,7 @@ export async function PATCH(request: Request) {
 
 const createSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
-  ministryId: z.string().min(1, "Le ministere est requis"),
+  ministryId: z.string().min(1, "Le ministère est requis"),
 });
 
 export async function POST(request: Request) {

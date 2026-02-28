@@ -103,7 +103,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
   }
 
   async function handleDelete(ev: EventItem) {
-    if (!confirm(`Supprimer l'evenement "${ev.title}" ?`)) return;
+    if (!confirm(`Supprimer l'événement "${ev.title}" ?`)) return;
 
     try {
       const res = await fetch(`/api/events/${ev.id}`, { method: "DELETE" });
@@ -119,7 +119,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
   }
 
   async function handleBulkDelete() {
-    if (!confirm(`Supprimer ${selectedIds.size} evenement(s) ?`)) return;
+    if (!confirm(`Supprimer ${selectedIds.size} événement(s) ?`)) return;
 
     try {
       const res = await fetch("/api/events", {
@@ -204,7 +204,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
   return (
     <>
       <div className="mb-4">
-        <Button onClick={openCreate}>Nouvel evenement</Button>
+        <Button onClick={openCreate}>Nouvel événement</Button>
       </div>
 
       <div className="bg-white rounded-lg shadow">
@@ -217,11 +217,11 @@ export default function EventsClient({ initialEvents, churches }: Props) {
               accessor: (ev: EventItem) => formatDate(ev.date),
             },
             {
-              header: "Eglise",
+              header: "Église",
               accessor: (ev: EventItem) => ev.church.name,
             },
             {
-              header: "Departements",
+              header: "Départements",
               accessor: (ev: EventItem) =>
                 ev.eventDepts.length > 0
                   ? ev.eventDepts.map((ed) => ed.department.name).join(", ")
@@ -229,7 +229,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
             },
           ]}
           data={events}
-          emptyMessage="Aucun evenement."
+          emptyMessage="Aucun événement."
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
@@ -239,7 +239,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
                 <Button variant="secondary">STAR</Button>
               </Link>
               <Link href={`/admin/events/${ev.id}`}>
-                <Button variant="secondary">Detail</Button>
+                <Button variant="secondary">Détail</Button>
               </Link>
               <Button variant="secondary" onClick={() => openEdit(ev)}>
                 Modifier
@@ -262,7 +262,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? "Modifier l'evenement" : "Nouvel evenement"}
+        title={editing ? "Modifier l'événement" : "Nouvel événement"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -286,7 +286,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
           />
           {!editing && (
             <Select
-              label="Eglise"
+              label="Église"
               value={churchId}
               onChange={(e) => setChurchId(e.target.value)}
               options={churches.map((c) => ({ value: c.id, label: c.name }))}
@@ -311,10 +311,10 @@ export default function EventsClient({ initialEvents, churches }: Props) {
       <Modal
         open={bulkModalOpen}
         onClose={() => setBulkModalOpen(false)}
-        title={`Modifier ${selectedIds.size} evenement(s)`}
+        title={`Modifier ${selectedIds.size} événement(s)`}
       >
         <p className="text-sm text-gray-500 mb-4">
-          Seuls les champs remplis seront modifies.
+          Seuls les champs remplis seront modifiés.
         </p>
         <form onSubmit={handleBulkEdit} className="space-y-4">
           <Input

@@ -80,7 +80,7 @@ export async function DELETE(
     });
 
     if (!event) {
-      throw new ApiError(404, "Evenement introuvable");
+      throw new ApiError(404, "Événement introuvable");
     }
 
     await prisma.event.delete({ where: { id: eventId } });

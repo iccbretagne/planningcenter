@@ -43,13 +43,13 @@ export async function DELETE(
     });
 
     if (!church) {
-      throw new ApiError(404, "Eglise introuvable");
+      throw new ApiError(404, "Église introuvable");
     }
 
     if (church._count.users > 0 || church._count.ministries > 0 || church._count.events > 0) {
       throw new ApiError(
         400,
-        "Impossible de supprimer une eglise qui contient des donnees"
+        "Impossible de supprimer une église qui contient des données"
       );
     }
 

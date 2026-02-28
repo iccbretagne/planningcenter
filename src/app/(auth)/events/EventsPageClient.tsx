@@ -151,7 +151,7 @@ export default function EventsPageClient({ churchId }: { churchId: string }) {
               <h3 className="font-semibold text-gray-800 mb-3">{event.title}</h3>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-500">
-                  {event.eventDepts.length} departement{event.eventDepts.length !== 1 ? "s" : ""}
+                  {event.eventDepts.length} département{event.eventDepts.length !== 1 ? "s" : ""}
                 </span>
                 <Link
                   href={`/events/${event.id}/star-view`}

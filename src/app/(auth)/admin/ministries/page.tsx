@@ -26,7 +26,7 @@ export default async function MinistriesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Ministeres</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Ministères</h1>
       <MinistriesClient
         initialMinistries={ministries}
         churches={uniqueChurches.map((c) => ({ id: c.id, name: c.name }))}

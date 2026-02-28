@@ -95,7 +95,7 @@ export default function MinistriesClient({
   }
 
   async function handleDelete(m: Ministry) {
-    if (!confirm(`Supprimer le ministere "${m.name}" ?`)) return;
+    if (!confirm(`Supprimer le ministère "${m.name}" ?`)) return;
 
     try {
       const res = await fetch(`/api/ministries/${m.id}`, { method: "DELETE" });
@@ -111,7 +111,7 @@ export default function MinistriesClient({
   }
 
   async function handleBulkDelete() {
-    if (!confirm(`Supprimer ${selectedIds.size} ministere(s) ?`)) return;
+    if (!confirm(`Supprimer ${selectedIds.size} ministère(s) ?`)) return;
 
     try {
       const res = await fetch("/api/ministries", {
@@ -179,7 +179,7 @@ export default function MinistriesClient({
   return (
     <>
       <div className="mb-4">
-        <Button onClick={openCreate}>Nouveau ministere</Button>
+        <Button onClick={openCreate}>Nouveau ministère</Button>
       </div>
 
       <div className="bg-white rounded-lg shadow">
@@ -187,12 +187,12 @@ export default function MinistriesClient({
           columns={[
             { header: "Nom", accessor: "name" },
             {
-              header: "Eglise",
+              header: "Église",
               accessor: (m: Ministry) => m.church.name,
             },
           ]}
           data={ministries}
-          emptyMessage="Aucun ministere."
+          emptyMessage="Aucun ministère."
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
@@ -219,7 +219,7 @@ export default function MinistriesClient({
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? "Modifier le ministere" : "Nouveau ministere"}
+        title={editing ? "Modifier le ministère" : "Nouveau ministère"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -230,7 +230,7 @@ export default function MinistriesClient({
           />
           {!editing && (
             <Select
-              label="Eglise"
+              label="Église"
               value={churchId}
               onChange={(e) => setChurchId(e.target.value)}
               options={churches.map((c) => ({ value: c.id, label: c.name }))}
@@ -255,10 +255,10 @@ export default function MinistriesClient({
       <Modal
         open={bulkModalOpen}
         onClose={() => setBulkModalOpen(false)}
-        title={`Modifier ${selectedIds.size} ministere(s)`}
+        title={`Modifier ${selectedIds.size} ministère(s)`}
       >
         <p className="text-sm text-gray-500 mb-4">
-          Seuls les champs remplis seront modifies.
+          Seuls les champs remplis seront modifiés.
         </p>
         <form onSubmit={handleBulkEdit} className="space-y-4">
           <Input
@@ -268,7 +268,7 @@ export default function MinistriesClient({
             placeholder="Laisser vide pour ne pas modifier"
           />
           <Select
-            label="Eglise"
+            label="Église"
             value={bulkChurchId}
             onChange={(e) => setBulkChurchId(e.target.value)}
             placeholder="Ne pas modifier"

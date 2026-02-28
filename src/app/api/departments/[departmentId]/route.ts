@@ -45,13 +45,13 @@ export async function DELETE(
     });
 
     if (!department) {
-      throw new ApiError(404, "Departement introuvable");
+      throw new ApiError(404, "Département introuvable");
     }
 
     if (department.members.length > 0) {
       throw new ApiError(
         400,
-        "Impossible de supprimer un departement qui contient des membres"
+        "Impossible de supprimer un département qui contient des membres"
       );
     }
 

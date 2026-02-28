@@ -43,13 +43,13 @@ export async function DELETE(
     });
 
     if (!ministry) {
-      throw new ApiError(404, "Ministere introuvable");
+      throw new ApiError(404, "Ministère introuvable");
     }
 
     if (ministry.departments.length > 0) {
       throw new ApiError(
         400,
-        "Impossible de supprimer un ministere qui contient des departements"
+        "Impossible de supprimer un ministère qui contient des départements"
       );
     }
 

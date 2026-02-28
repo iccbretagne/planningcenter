@@ -4,7 +4,7 @@ import { successResponse, errorResponse } from "@/lib/api-utils";
 import { z } from "zod";
 
 const schema = z.object({
-  departmentId: z.string().min(1, "Le departement est requis"),
+  departmentId: z.string().min(1, "Le département est requis"),
 });
 
 export async function POST(

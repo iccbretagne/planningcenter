@@ -128,7 +128,7 @@ export default function PlanningGrid({
   if (members.length === 0) {
     return (
       <div className="p-4 text-gray-500">
-        Aucun membre dans ce departement.
+        Aucun membre dans ce département.
       </div>
     );
   }

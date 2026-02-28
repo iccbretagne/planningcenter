@@ -58,7 +58,7 @@ export async function PATCH(request: Request) {
     }
 
     if (!data || Object.keys(data).length === 0) {
-      return errorResponse(new Error("Aucune donnee a mettre a jour"));
+      return errorResponse(new Error("Aucune donnée à mettre à jour"));
     }
 
     const updateData: Record<string, unknown> = { ...data };
@@ -81,7 +81,7 @@ const createSchema = z.object({
   title: z.string().min(1, "Le titre est requis"),
   type: z.string().min(1, "Le type est requis"),
   date: z.string().min(1, "La date est requise"),
-  churchId: z.string().min(1, "L'eglise est requise"),
+  churchId: z.string().min(1, "L'église est requise"),
 });
 
 export async function POST(request: Request) {

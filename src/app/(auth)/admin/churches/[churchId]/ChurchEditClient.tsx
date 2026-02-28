@@ -61,7 +61,7 @@ export default function ChurchEditClient({ church }: Props) {
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
         {success && (
-          <p className="text-sm text-green-600">Eglise mise a jour.</p>
+          <p className="text-sm text-green-600">Église mise à jour.</p>
         )}
         <div className="flex gap-2">
           <Button type="submit" disabled={loading}>

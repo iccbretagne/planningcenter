@@ -102,16 +102,16 @@ export default function Sidebar({
 
   return (
     <aside className="w-64 min-h-[calc(100vh-73px)] bg-white border-r border-gray-200 p-4 space-y-1">
-      {/* Departements */}
+      {/* Départements */}
       <AccordionSection
-        title="Departements"
+        title="Départements"
         icon={<IconDepartments className="w-4 h-4" />}
         defaultOpen
         isActive={isDashboardActive}
       >
         {departments.length === 0 ? (
           <p className="px-3 text-sm text-gray-400">
-            Aucun departement assigne.
+            Aucun département assigné.
           </p>
         ) : (
           <nav className="space-y-0.5 pl-6">

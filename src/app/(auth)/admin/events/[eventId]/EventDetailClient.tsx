@@ -70,7 +70,7 @@ export default function EventDetailClient({ eventId, departments }: Props) {
       </div>
 
       <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        Departements associes
+        Départements associés
       </h2>
 
       <div className="space-y-6">

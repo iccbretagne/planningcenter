@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { type Session } from "next-auth";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
@@ -106,4 +106,45 @@ export async function requirePermission(permission: string, churchId?: string) {
   }
 
   return session;
+}
+
+export async function requireAnyPermission(...permissions: string[]) {
+  const session = await requireAuth();
+
+  const { hasPermission } = await import("./permissions");
+  const userPermissions = new Set(
+    session.user.churchRoles.flatMap((r) => hasPermission(r.role))
+  );
+
+  if (!permissions.some((p) => userPermissions.has(p))) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return session;
+}
+
+type DepartmentScope =
+  | { scoped: false }
+  | { scoped: true; departmentIds: string[] };
+
+const GLOBAL_ROLES: Role[] = ["SUPER_ADMIN", "ADMIN"];
+
+export function getUserDepartmentScope(session: Session): DepartmentScope {
+  const hasGlobalRole = session.user.churchRoles.some((r) =>
+    GLOBAL_ROLES.includes(r.role)
+  );
+
+  if (hasGlobalRole) {
+    return { scoped: false };
+  }
+
+  const departmentIds = Array.from(
+    new Set(
+      session.user.churchRoles.flatMap((r) =>
+        r.departments.map((d) => d.department.id)
+      )
+    )
+  );
+
+  return { scoped: true, departmentIds };
 }

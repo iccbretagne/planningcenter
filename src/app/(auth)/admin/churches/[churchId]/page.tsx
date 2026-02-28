@@ -20,7 +20,7 @@ export default async function ChurchDetailPage({
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        Modifier l&apos;eglise
+        Modifier l&apos;église
       </h1>
       <ChurchEditClient church={{ id: church.id, name: church.name, slug: church.slug }} />
     </div>

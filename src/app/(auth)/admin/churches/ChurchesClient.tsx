@@ -71,7 +71,7 @@ export default function ChurchesClient({ initialChurches }: Props) {
   }
 
   async function handleDelete(c: Church) {
-    if (!confirm(`Supprimer l'eglise "${c.name}" ?`)) return;
+    if (!confirm(`Supprimer l'église "${c.name}" ?`)) return;
 
     try {
       const res = await fetch(`/api/churches/${c.id}`, { method: "DELETE" });
@@ -87,7 +87,7 @@ export default function ChurchesClient({ initialChurches }: Props) {
   }
 
   async function handleBulkDelete() {
-    if (!confirm(`Supprimer ${selectedIds.size} eglise(s) ?`)) return;
+    if (!confirm(`Supprimer ${selectedIds.size} église(s) ?`)) return;
 
     try {
       const res = await fetch("/api/churches", {
@@ -155,7 +155,7 @@ export default function ChurchesClient({ initialChurches }: Props) {
   return (
     <>
       <div className="mb-4">
-        <Button onClick={openCreate}>Nouvelle eglise</Button>
+        <Button onClick={openCreate}>Nouvelle église</Button>
       </div>
 
       <div className="bg-white rounded-lg shadow">
@@ -168,16 +168,16 @@ export default function ChurchesClient({ initialChurches }: Props) {
               accessor: (c: Church) => c._count.users,
             },
             {
-              header: "Ministeres",
+              header: "Ministères",
               accessor: (c: Church) => c._count.ministries,
             },
             {
-              header: "Evenements",
+              header: "Événements",
               accessor: (c: Church) => c._count.events,
             },
           ]}
           data={churches}
-          emptyMessage="Aucune eglise."
+          emptyMessage="Aucune église."
           selectable
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
@@ -204,7 +204,7 @@ export default function ChurchesClient({ initialChurches }: Props) {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="Nouvelle eglise"
+        title="Nouvelle église"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -218,7 +218,7 @@ export default function ChurchesClient({ initialChurches }: Props) {
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             required
-            placeholder="ex: mon-eglise"
+            placeholder="ex: mon-église"
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-end gap-2">
@@ -230,7 +230,7 @@ export default function ChurchesClient({ initialChurches }: Props) {
               Annuler
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Enregistrement..." : "Creer"}
+              {loading ? "Enregistrement..." : "Créer"}
             </Button>
           </div>
         </form>
@@ -239,10 +239,10 @@ export default function ChurchesClient({ initialChurches }: Props) {
       <Modal
         open={bulkModalOpen}
         onClose={() => setBulkModalOpen(false)}
-        title={`Modifier ${selectedIds.size} eglise(s)`}
+        title={`Modifier ${selectedIds.size} église(s)`}
       >
         <p className="text-sm text-gray-500 mb-4">
-          Seuls les champs remplis seront modifies.
+          Seuls les champs remplis seront modifiés.
         </p>
         <form onSubmit={handleBulkEdit} className="space-y-4">
           <Input

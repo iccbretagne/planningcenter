@@ -85,7 +85,7 @@ export async function PATCH(request: Request) {
     }
 
     if (!data || Object.keys(data).length === 0) {
-      return errorResponse(new Error("Aucune donnee a mettre a jour"));
+      return errorResponse(new Error("Aucune donnée à mettre à jour"));
     }
 
     await prisma.church.updateMany({
