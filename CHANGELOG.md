@@ -6,6 +6,19 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.2.0] - 2026-03-01
+
+### Ajoute
+
+- Bootstrap SUPER_ADMIN : les utilisateurs declares dans `SUPER_ADMIN_EMAILS` peuvent creer la premiere eglise sans role prealable
+- Auto-promotion : creation d'une eglise assigne automatiquement tous les SUPER_ADMIN existants
+- Selecteur d'eglise : dropdown dans le header pour les utilisateurs multi-eglises, persistance via cookie
+- Helper `isSuperAdmin()` pour verifier le statut Super Admin par email
+- Helper `getCurrentChurchId()` pour resoudre l'eglise active (cookie avec fallback)
+- Endpoint POST `/api/current-church` pour changer d'eglise courante
+- Composant `ChurchSwitcher` (dropdown masque si une seule eglise)
+- Auto-generation du slug d'eglise depuis le nom (avec possibilite de modification manuelle)
+
 ## [v0.1.0] - 2026-02-28
 
 ### Ajoute
