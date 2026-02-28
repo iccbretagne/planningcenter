@@ -6,26 +6,6 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
-### Ajoute
-
-- Affectation ministere/departements aux roles MINISTER et DEPARTMENT_HEAD depuis l'interface admin
-- Composant `CheckboxGroup` pour la selection multiple de departements
-- Endpoint PATCH `/api/users/[userId]/roles` pour modifier les affectations
-- Badges enrichis affichant le ministere/departements associes avec bouton d'edition
-- Helper `requireAnyPermission()` pour verifier plusieurs permissions
-- Helper `getUserDepartmentScope()` pour le filtrage par departement selon le role
-- Permission `members:manage` accordee aux roles MINISTER et DEPARTMENT_HEAD
-- CI GitHub Actions : typecheck et validation de version sur tags
-- Dependabot : mises a jour hebdomadaires npm et GitHub Actions
-- Affichage de la version dans le footer (depuis `package.json`)
-- Script `typecheck` dans package.json
-- Dependabot : ignore les montées de version majeures (npm et GitHub Actions)
-
-### Corrige
-
-- Cascade de suppression des roles avec departements associes (FK constraint MySQL)
-- Permissions des liens sidebar admin (alignees avec les permissions des pages)
-
 ## [v0.1.0] - 2026-02-28
 
 ### Ajoute
@@ -45,3 +25,20 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 - Export PDF des plannings
 - Page evenements avec selecteur et vue par departement
 - Auto-promotion Super Admin par email (`SUPER_ADMIN_EMAILS`)
+- Affectation ministere/departements aux roles MINISTER et DEPARTMENT_HEAD depuis l'interface admin
+- Composant `CheckboxGroup` pour la selection multiple de departements
+- Endpoint PATCH `/api/users/[userId]/roles` pour modifier les affectations
+- Badges enrichis affichant le ministere/departements associes avec bouton d'edition
+- Helper `requireAnyPermission()` pour verifier plusieurs permissions
+- Helper `getUserDepartmentScope()` pour le filtrage par departement selon le role
+- Permission `members:manage` accordee aux roles MINISTER et DEPARTMENT_HEAD
+- CI GitHub Actions : typecheck et validation de version sur tags
+- Dependabot : mises a jour hebdomadaires npm et GitHub Actions (minor/patch uniquement)
+- Affichage de la version dans le footer (depuis `package.json`)
+- Script `typecheck` dans package.json
+- Guide de deploiement production (Debian, Traefik, systemd)
+
+### Corrige
+
+- Cascade de suppression des roles avec departements associes (FK constraint MySQL)
+- Permissions des liens sidebar admin (alignees avec les permissions des pages)
