@@ -1,11 +1,18 @@
 import { prisma } from "@/lib/prisma";
-import { requirePermission } from "@/lib/auth";
+import { requireAuth, requirePermission, isSuperAdmin } from "@/lib/auth";
 import { successResponse, errorResponse } from "@/lib/api-utils";
 import { z } from "zod";
 
+async function requireChurchManageOrSuperAdmin() {
+  const session = await requireAuth();
+  if (isSuperAdmin(session.user.email)) return session;
+
+  return requirePermission("church:manage");
+}
+
 export async function GET() {
   try {
-    await requirePermission("church:manage");
+    await requireChurchManageOrSuperAdmin();
 
     const churches = await prisma.church.findMany({
       include: {
@@ -31,7 +38,7 @@ const bulkSchema = z.object({
 
 export async function PATCH(request: Request) {
   try {
-    await requirePermission("church:manage");
+    await requireChurchManageOrSuperAdmin();
     const body = await request.json();
     const { ids, action, data } = bulkSchema.parse(body);
 
@@ -99,18 +106,66 @@ export async function PATCH(request: Request) {
   }
 }
 
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove accents
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 const createSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
-  slug: z.string().min(1, "Le slug est requis"),
+  slug: z.string().min(1).optional(),
 });
 
 export async function POST(request: Request) {
   try {
-    await requirePermission("church:manage");
+    await requireChurchManageOrSuperAdmin();
     const body = await request.json();
-    const data = createSchema.parse(body);
+    const parsed = createSchema.parse(body);
+    const slug = parsed.slug || generateSlug(parsed.name);
 
-    const church = await prisma.church.create({ data });
+    const church = await prisma.church.create({
+      data: { name: parsed.name, slug },
+    });
+
+    // Auto-promote all SUPER_ADMIN users to the new church
+    const superAdminRoles = await prisma.userChurchRole.findMany({
+      where: { role: "SUPER_ADMIN" },
+      select: { userId: true },
+    });
+    const superAdminUserIds = new Set(superAdminRoles.map((r) => r.userId));
+
+    // Also include users whose email is in SUPER_ADMIN_EMAILS but have no role yet
+    const superAdminEmailUsers = await prisma.user.findMany({
+      where: {
+        email: { in: (process.env.SUPER_ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean) },
+      },
+      select: { id: true },
+    });
+    for (const u of superAdminEmailUsers) {
+      superAdminUserIds.add(u.id);
+    }
+
+    for (const userId of superAdminUserIds) {
+      await prisma.userChurchRole.upsert({
+        where: {
+          userId_churchId_role: {
+            userId,
+            churchId: church.id,
+            role: "SUPER_ADMIN",
+          },
+        },
+        update: {},
+        create: {
+          userId,
+          churchId: church.id,
+          role: "SUPER_ADMIN",
+        },
+      });
+    }
 
     return successResponse(church, 201);
   } catch (error) {

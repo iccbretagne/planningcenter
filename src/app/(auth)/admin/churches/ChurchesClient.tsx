@@ -24,6 +24,7 @@ export default function ChurchesClient({ initialChurches }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -33,11 +34,28 @@ export default function ChurchesClient({ initialChurches }: Props) {
   const [bulkError, setBulkError] = useState("");
   const [bulkLoading, setBulkLoading] = useState(false);
 
+  function toSlug(value: string): string {
+    return value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
   function openCreate() {
     setName("");
     setSlug("");
+    setSlugTouched(false);
     setError("");
     setModalOpen(true);
+  }
+
+  function handleNameChange(value: string) {
+    setName(value);
+    if (!slugTouched) {
+      setSlug(toSlug(value));
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -210,15 +228,18 @@ export default function ChurchesClient({ initialChurches }: Props) {
           <Input
             label="Nom"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => handleNameChange(e.target.value)}
             required
           />
           <Input
             label="Slug"
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            onChange={(e) => {
+              setSlugTouched(true);
+              setSlug(e.target.value);
+            }}
             required
-            placeholder="ex: mon-église"
+            placeholder="généré automatiquement"
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-end gap-2">

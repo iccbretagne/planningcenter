@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth, getCurrentChurchId } from "@/lib/auth";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -21,7 +21,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     view = "event",
   } = await searchParams;
 
-  const currentChurchId = session.user.churchRoles[0]?.churchId;
+  const currentChurchId = await getCurrentChurchId(session);
   const userPermissions = new Set(
     session.user.churchRoles.flatMap((r) => hasPermission(r.role))
   );

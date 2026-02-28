@@ -1,9 +1,10 @@
 import pkg from "@/../package.json";
 import { redirect } from "next/navigation";
-import { auth, signOut } from "@/lib/auth";
+import { auth, signOut, getCurrentChurchId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasPermission } from "@/lib/permissions";
 import Sidebar from "@/components/Sidebar";
+import ChurchSwitcher from "@/components/ChurchSwitcher";
 
 const adminLinks = [
   { href: "/admin/churches", label: "Églises", permissions: ["church:manage"] },
@@ -26,8 +27,13 @@ export default async function AuthLayout({
   }
 
   const churchRoles = session.user.churchRoles;
-  const currentChurchId = churchRoles[0]?.churchId;
-  const churchName = churchRoles[0]?.church?.name || "Église";
+  const currentChurchId = await getCurrentChurchId(session);
+  const currentChurch = churchRoles.find((r) => r.churchId === currentChurchId);
+  const churchName = currentChurch?.church?.name || "Église";
+
+  const churches = Array.from(
+    new Map(churchRoles.map((r) => [r.churchId, { id: r.churchId, name: r.church.name }])).values()
+  );
 
   // Get departments the user has access to
   const userDepartmentIds = churchRoles
@@ -68,7 +74,11 @@ export default async function AuthLayout({
         <div className="flex items-center justify-between px-6 py-4 mx-auto max-w-7xl">
           <div>
             <h1 className="text-xl font-bold text-white">PlanningCenter</h1>
-            <p className="text-sm text-white/70">{churchName}</p>
+            {currentChurchId && churches.length > 1 ? (
+              <ChurchSwitcher churches={churches} currentChurchId={currentChurchId} />
+            ) : (
+              <p className="text-sm text-white/70">{churchName}</p>
+            )}
           </div>
           <div className="flex items-center gap-4">
             {session.user.image && (
