@@ -23,6 +23,7 @@
 
 ## Planning
 
+- [ ] Creation d'evenements avec recurrence (hebdomadaire, mensuel, etc.)
 - [ ] Vue calendrier des evenements
 - [ ] Duplication d'un planning d'un evenement a un autre
 - [ ] Historique des modifications (audit log)

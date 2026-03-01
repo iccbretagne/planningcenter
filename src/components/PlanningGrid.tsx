@@ -26,7 +26,7 @@ const STATUS_OPTIONS = [
   {
     value: "EN_SERVICE_DEBRIEF",
     label: "En service + Debrief",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-icc-violet-light text-icc-violet",
   },
   {
     value: "INDISPONIBLE",
@@ -130,7 +130,7 @@ export default function PlanningGrid({
   if (members.length === 0) {
     return (
       <div className="p-4 text-gray-500">
-        Aucun membre dans ce département.
+        Aucun STAR dans ce département.
       </div>
     );
   }
@@ -168,7 +168,7 @@ export default function PlanningGrid({
           <thead>
             <tr className="bg-gray-50">
               <th className="px-4 py-3 text-sm font-medium text-left text-gray-700">
-                Membre
+                STAR
               </th>
               <th className="px-4 py-3 text-sm font-medium text-center text-gray-700">
                 Statut

@@ -37,6 +37,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     "members:manage",
     "events:view",
     "departments:view",
+    "departments:manage",
   ],
   DEPARTMENT_HEAD: [
     "planning:view",

@@ -114,7 +114,7 @@ export default function MembersClient({ initialMembers, departments, readOnly = 
   }
 
   async function handleBulkDelete() {
-    if (!confirm(`Supprimer ${selectedIds.size} membre(s) ?`)) return;
+    if (!confirm(`Supprimer ${selectedIds.size} STAR ?`)) return;
 
     try {
       const res = await fetch("/api/members", {
@@ -202,7 +202,7 @@ export default function MembersClient({ initialMembers, departments, readOnly = 
   return (
     <>
       <div className="mb-4 flex items-center gap-4">
-        {!readOnly && <Button onClick={openCreate}>Nouveau membre</Button>}
+        {!readOnly && <Button onClick={openCreate}>Nouveau STAR</Button>}
         <div className="w-64">
           <Select
             label=""
@@ -232,7 +232,7 @@ export default function MembersClient({ initialMembers, departments, readOnly = 
             },
           ]}
           data={filtered}
-          emptyMessage="Aucun membre."
+          emptyMessage="Aucun STAR."
           selectable={!readOnly}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
@@ -259,7 +259,7 @@ export default function MembersClient({ initialMembers, departments, readOnly = 
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? "Modifier le membre" : "Nouveau membre"}
+        title={editing ? "Modifier le STAR" : "Nouveau STAR"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -302,7 +302,7 @@ export default function MembersClient({ initialMembers, departments, readOnly = 
       <Modal
         open={bulkModalOpen}
         onClose={() => setBulkModalOpen(false)}
-        title={`Modifier ${selectedIds.size} membre(s)`}
+        title={`Modifier ${selectedIds.size} STAR`}
       >
         <p className="text-sm text-gray-500 mb-4">
           Seuls les champs remplis seront modifiés.

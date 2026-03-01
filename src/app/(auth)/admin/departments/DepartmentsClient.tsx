@@ -204,7 +204,7 @@ export default function DepartmentsClient({
               accessor: (d: Department) => d.ministry.name,
             },
             {
-              header: "Membres",
+              header: "STAR",
               accessor: (d: Department) => d._count.members,
             },
           ]}

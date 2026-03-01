@@ -1,7 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/auth";
-import { successResponse, errorResponse } from "@/lib/api-utils";
+import { successResponse, errorResponse, ApiError } from "@/lib/api-utils";
 import { z } from "zod";
+import type { Session } from "next-auth";
+
+function getMinisterMinistryIds(session: Session): string[] | null {
+  const isGlobal = session.user.churchRoles.some((r) =>
+    ["SUPER_ADMIN", "ADMIN"].includes(r.role)
+  );
+  if (isGlobal) return null; // no restriction
+  return session.user.churchRoles
+    .filter((r) => r.role === "MINISTER" && r.ministryId)
+    .map((r) => r.ministryId as string);
+}
 
 export async function GET(request: Request) {
   try {
@@ -38,9 +49,24 @@ const bulkSchema = z.object({
 
 export async function PATCH(request: Request) {
   try {
-    await requirePermission("departments:manage");
+    const session = await requirePermission("departments:manage");
     const body = await request.json();
     const { ids, action, data } = bulkSchema.parse(body);
+
+    const allowedMinistries = getMinisterMinistryIds(session);
+    if (allowedMinistries !== null) {
+      const targetDepts = await prisma.department.findMany({
+        where: { id: { in: ids } },
+        select: { ministryId: true },
+      });
+      const allAllowed = targetDepts.every((d) => allowedMinistries.includes(d.ministryId));
+      if (!allAllowed) {
+        throw new ApiError(403, "Vous ne pouvez modifier que les départements de votre ministère");
+      }
+      if (data?.ministryId && !allowedMinistries.includes(data.ministryId)) {
+        throw new ApiError(403, "Vous ne pouvez déplacer un département que vers votre ministère");
+      }
+    }
 
     if (action === "delete") {
       await prisma.$transaction(async (tx) => {
@@ -82,9 +108,14 @@ const createSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    await requirePermission("departments:manage");
+    const session = await requirePermission("departments:manage");
     const body = await request.json();
     const data = createSchema.parse(body);
+
+    const allowedMinistries = getMinisterMinistryIds(session);
+    if (allowedMinistries !== null && !allowedMinistries.includes(data.ministryId)) {
+      throw new ApiError(403, "Vous ne pouvez créer un département que dans votre ministère");
+    }
 
     const department = await prisma.department.create({
       data,

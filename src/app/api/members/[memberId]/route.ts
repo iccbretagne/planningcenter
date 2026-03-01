@@ -27,11 +27,11 @@ export async function PUT(
       });
 
       if (!existing) {
-        throw new ApiError(404, "Membre introuvable");
+        throw new ApiError(404, "STAR introuvable");
       }
 
       if (!scope.departmentIds.includes(existing.departmentId)) {
-        throw new ApiError(403, "Ce membre est hors de votre périmètre");
+        throw new ApiError(403, "Ce STAR est hors de votre périmètre");
       }
 
       if (!scope.departmentIds.includes(data.departmentId)) {
@@ -74,11 +74,11 @@ export async function DELETE(
     });
 
     if (!member) {
-      throw new ApiError(404, "Membre introuvable");
+      throw new ApiError(404, "STAR introuvable");
     }
 
     if (scope.scoped && !scope.departmentIds.includes(member.departmentId)) {
-      throw new ApiError(403, "Ce membre est hors de votre périmètre");
+      throw new ApiError(403, "Ce STAR est hors de votre périmètre");
     }
 
     await prisma.member.delete({ where: { id: memberId } });

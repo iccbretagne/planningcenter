@@ -71,7 +71,7 @@ export async function PATCH(request: Request) {
         scope.departmentIds.includes(m.departmentId)
       );
       if (!allInScope) {
-        throw new ApiError(403, "Certains membres sont hors de votre périmètre");
+        throw new ApiError(403, "Certains STAR sont hors de votre périmètre");
       }
 
       if (action === "update" && data?.departmentId && !scope.departmentIds.includes(data.departmentId)) {
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
     const data = createSchema.parse(body);
 
     if (scope.scoped && !scope.departmentIds.includes(data.departmentId)) {
-      throw new ApiError(403, "Vous ne pouvez pas créer un membre dans ce département");
+      throw new ApiError(403, "Vous ne pouvez pas créer un STAR dans ce département");
     }
 
     const member = await prisma.member.create({

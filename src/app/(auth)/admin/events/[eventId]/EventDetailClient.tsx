@@ -73,7 +73,7 @@ export default function EventDetailClient({ eventId, departments }: Props) {
         Départements associés
       </h2>
 
-      <div className="space-y-6">
+      <div className="space-y-6 max-h-[70vh] overflow-y-auto">
         {Object.entries(grouped).map(([ministry, deps]) => (
           <div key={ministry} className="bg-white rounded-lg shadow p-4">
             <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">
