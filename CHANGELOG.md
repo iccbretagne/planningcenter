@@ -6,6 +6,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.3.1] - 2026-03-01
+
+### Ajoute
+
+- Changement de ministere lors de l'edition d'un departement (Select ministere + validation scope)
+
 ## [v0.3.0] - 2026-03-01
 
 ### Ajoute
