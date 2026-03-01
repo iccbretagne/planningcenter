@@ -6,6 +6,22 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.3.0] - 2026-03-01
+
+### Ajoute
+
+- Permission `departments:manage` pour le role MINISTER (gestion des departements de son ministere)
+- Chargement du `ministryId` dans la session utilisateur
+- Scoping des departements par ministere pour les Ministres (page admin + API)
+- Verification du scope ministere dans les API departments (POST/PATCH/PUT/DELETE)
+- Icone bulle de discussion pour le statut EN_SERVICE_DEBRIEF
+
+### Corrige
+
+- Contraste EN_SERVICE_DEBRIEF : couleur jaune remplacee par violet (PlanningGrid, MonthlyPlanningView, StarView)
+- Couleurs jaunes remplacees par violet dans la vue STAR evenement
+- Overflow de la liste departements sur la page admin evenement (scroll vertical)
+
 ## [v0.2.1] - 2026-03-01
 
 ### Corrige
