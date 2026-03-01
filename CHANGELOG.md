@@ -6,6 +6,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.2.1] - 2026-03-01
+
+### Corrige
+
+- Bus error au build : import dynamique de `cookies` dans `getCurrentChurchId()` (evite le chargement de `next/headers` au niveau module)
+
 ## [v0.2.0] - 2026-03-01
 
 ### Ajoute
