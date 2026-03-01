@@ -68,8 +68,21 @@ export default function StarViewClient({ eventId }: Props) {
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("landscape", "mm", "a4");
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgRatio = canvas.height / canvas.width;
+
+    let renderWidth = pdfWidth;
+    let renderHeight = pdfWidth * imgRatio;
+
+    // If content is taller than one page, scale down to fit
+    if (renderHeight > pdfHeight) {
+      renderHeight = pdfHeight;
+      renderWidth = pdfHeight / imgRatio;
+    }
+
+    // Center horizontally if scaled down
+    const offsetX = (pdfWidth - renderWidth) / 2;
+    pdf.addImage(imgData, "PNG", offsetX, 0, renderWidth, renderHeight);
     pdf.save(`STAR-${data?.event.title || "export"}.pdf`);
   }
 
@@ -81,18 +94,30 @@ export default function StarViewClient({ eventId }: Props) {
       scale: 2,
       useCORS: true,
     });
-    canvas.toBlob(async (blob) => {
-      if (blob) {
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ "image/png": blob }),
-          ]);
-          alert("Image copiee dans le presse-papier");
-        } catch {
-          alert("Impossible de copier l'image");
-        }
+
+    try {
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error("toBlob failed"));
+        }, "image/png");
+      });
+
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": blob }),
+      ]);
+      alert("Image copiée dans le presse-papier");
+    } catch {
+      // Fallback: open image in new tab so user can copy manually
+      const dataUrl = canvas.toDataURL("image/png");
+      const w = window.open();
+      if (w) {
+        w.document.write(`<img src="${dataUrl}" />`);
+        w.document.title = "STAR - copier l'image";
+      } else {
+        alert("Impossible de copier l'image. Vérifiez les permissions du navigateur.");
       }
-    });
+    }
   }
 
   function handlePrint() {
