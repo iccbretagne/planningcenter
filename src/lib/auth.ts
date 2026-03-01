@@ -1,7 +1,6 @@
 import NextAuth, { type Session } from "next-auth";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import type { Role } from "@prisma/client";
 
@@ -165,6 +164,7 @@ export function getUserDepartmentScope(session: Session): DepartmentScope {
 export async function getCurrentChurchId(
   session: Session
 ): Promise<string | undefined> {
+  const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
   const preferred = cookieStore.get("current-church")?.value;
 
