@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import CheckboxGroup from "@/components/ui/CheckboxGroup";
 import Modal from "@/components/ui/Modal";
@@ -30,6 +31,7 @@ interface UserItem {
   id: string;
   email: string;
   name: string | null;
+  displayName: string | null;
   image: string | null;
   churchRoles: UserRole[];
 }
@@ -52,6 +54,8 @@ export default function UsersClient({
   isSuperAdmin,
 }: Props) {
   const [users, setUsers] = useState(initialUsers);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
   const [newRole, setNewRole] = useState(ROLES[1].value);
@@ -60,6 +64,13 @@ export default function UsersClient({
   const [newDepartmentIds, setNewDepartmentIds] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // DisplayName edit state
+  const [displayNameModalOpen, setDisplayNameModalOpen] = useState(false);
+  const [displayNameUserId, setDisplayNameUserId] = useState("");
+  const [displayNameValue, setDisplayNameValue] = useState("");
+  const [displayNameError, setDisplayNameError] = useState("");
+  const [displayNameLoading, setDisplayNameLoading] = useState(false);
 
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -89,6 +100,48 @@ export default function UsersClient({
     setNewDepartmentIds([]);
     setError("");
     setModalOpen(true);
+  }
+
+  function openEditDisplayName(user: UserItem) {
+    setDisplayNameUserId(user.id);
+    setDisplayNameValue(user.displayName || "");
+    setDisplayNameError("");
+    setDisplayNameModalOpen(true);
+  }
+
+  async function handleEditDisplayName(e: React.FormEvent) {
+    e.preventDefault();
+    setDisplayNameLoading(true);
+    setDisplayNameError("");
+
+    try {
+      const res = await fetch(`/api/users/${displayNameUserId}/profile`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName: displayNameValue }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erreur");
+      }
+
+      const saved = await res.json();
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === displayNameUserId
+            ? { ...u, displayName: saved.displayName }
+            : u
+        )
+      );
+
+      setDisplayNameModalOpen(false);
+    } catch (err) {
+      setDisplayNameError(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setDisplayNameLoading(false);
+    }
   }
 
   function openEditAssignment(userId: string, role: UserRole) {
@@ -277,10 +330,67 @@ export default function UsersClient({
     ? ministries.filter((m) => m.churchId === editRole.church.id)
     : [];
 
+  const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  const filteredUsers = users.filter((user) => {
+    const displayLabel = user.displayName || user.name || "";
+    const searchLower = searchQuery.toLowerCase();
+
+    const matchesSearch =
+      !searchQuery ||
+      displayLabel.toLowerCase().includes(searchLower) ||
+      (user.name || "").toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower);
+
+    const matchesLetter =
+      !activeLetter ||
+      displayLabel.toUpperCase().startsWith(activeLetter);
+
+    return matchesSearch && matchesLetter;
+  });
+
   return (
     <>
+      <div className="mb-4 space-y-3">
+        <Input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Rechercher par nom ou email..."
+        />
+        <div className="flex flex-wrap gap-1">
+          <button
+            onClick={() => setActiveLetter(null)}
+            className={`px-2 py-1 text-xs font-medium rounded ${
+              activeLetter === null
+                ? "bg-icc-violet text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Tous
+          </button>
+          {LETTERS.map((letter) => (
+            <button
+              key={letter}
+              onClick={() =>
+                setActiveLetter(activeLetter === letter ? null : letter)
+              }
+              className={`px-2 py-1 text-xs font-medium rounded ${
+                activeLetter === letter
+                  ? "bg-icc-violet text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-gray-500">
+          {filteredUsers.length} utilisateur{filteredUsers.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+
       <div className="space-y-4">
-        {users.map((user) => (
+        {filteredUsers.map((user) => (
           <div key={user.id} className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
@@ -293,16 +403,26 @@ export default function UsersClient({
                 )}
                 <div>
                   <p className="font-medium text-gray-900">
-                    {user.name || "Sans nom"}
+                    {user.displayName || user.name || "Sans nom"}
+                    {user.displayName && user.name && user.displayName !== user.name && (
+                      <span className="text-sm text-gray-400 ml-1">({user.name})</span>
+                    )}
                   </p>
                   <p className="text-sm text-gray-500">{user.email}</p>
                 </div>
               </div>
-              {canManageRoles && (
-                <Button variant="secondary" onClick={() => openAddRole(user)}>
-                  Ajouter un rôle
-                </Button>
-              )}
+              <div className="flex gap-2">
+                {canManageRoles && (
+                  <>
+                    <Button variant="secondary" onClick={() => openEditDisplayName(user)}>
+                      Nom d&apos;affichage
+                    </Button>
+                    <Button variant="secondary" onClick={() => openAddRole(user)}>
+                      Ajouter un rôle
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
 
             {user.churchRoles.length > 0 ? (
@@ -348,9 +468,9 @@ export default function UsersClient({
           </div>
         ))}
 
-        {users.length === 0 && (
+        {filteredUsers.length === 0 && (
           <p className="text-center text-gray-500 py-8">
-            Aucun utilisateur.
+            Aucun utilisateur trouvé.
           </p>
         )}
       </div>
@@ -419,6 +539,37 @@ export default function UsersClient({
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? "Enregistrement..." : "Ajouter"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit displayName modal */}
+      <Modal
+        open={displayNameModalOpen}
+        onClose={() => setDisplayNameModalOpen(false)}
+        title="Modifier le nom d'affichage"
+      >
+        <form onSubmit={handleEditDisplayName} className="space-y-4">
+          <Input
+            label="Nom d'affichage"
+            value={displayNameValue}
+            onChange={(e) => setDisplayNameValue(e.target.value)}
+            required
+          />
+          {displayNameError && (
+            <p className="text-sm text-red-600">{displayNameError}</p>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setDisplayNameModalOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button type="submit" disabled={displayNameLoading}>
+              {displayNameLoading ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </div>
         </form>

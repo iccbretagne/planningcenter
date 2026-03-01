@@ -7,6 +7,9 @@ export default async function MinistriesPage() {
 
   const churchRoles = session.user.churchRoles;
   const isSuperAdmin = churchRoles.some((r) => r.role === "SUPER_ADMIN");
+  const isMinisterOnly = !churchRoles.some((r) =>
+    ["SUPER_ADMIN", "ADMIN"].includes(r.role)
+  );
 
   const churches = isSuperAdmin
     ? await prisma.church.findMany({ orderBy: { name: "asc" } })
@@ -30,6 +33,7 @@ export default async function MinistriesPage() {
       <MinistriesClient
         initialMinistries={ministries}
         churches={uniqueChurches.map((c) => ({ id: c.id, name: c.name }))}
+        readOnly={isMinisterOnly}
       />
     </div>
   );

@@ -73,16 +73,17 @@ enum Role {
 }
 
 model User {
-  id          String           @id @default(cuid())
-  email       String           @unique
-  name        String?
-  image       String?
+  id            String           @id @default(cuid())
+  email         String           @unique
+  name          String?
+  displayName   String?
+  image         String?
   emailVerified DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  churchRoles UserChurchRole[]
-  accounts    Account[]
-  sessions    Session[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  churchRoles   UserChurchRole[]
+  accounts      Account[]
+  sessions      Session[]
 
   @@map("users")
 }
@@ -139,26 +140,31 @@ model Department {
 }
 
 model Member {
-  id           String     @id @default(cuid())
-  firstName    String
-  lastName     String
-  departmentId String
-  department   Department @relation(fields: [departmentId], references: [id])
-  plannings    Planning[]
-  createdAt    DateTime   @default(now())
+  id              String           @id @default(cuid())
+  firstName       String
+  lastName        String
+  departmentId    String
+  department      Department       @relation(fields: [departmentId], references: [id])
+  plannings       Planning[]
+  taskAssignments TaskAssignment[]
+  createdAt       DateTime         @default(now())
 
   @@map("members")
 }
 
 model Event {
-  id         String            @id @default(cuid())
-  title      String
-  type       String
-  date       DateTime
-  churchId   String
-  church     Church            @relation(fields: [churchId], references: [id])
-  eventDepts EventDepartment[]
-  createdAt  DateTime          @default(now())
+  id                 String            @id @default(cuid())
+  title              String
+  type               String
+  date               DateTime
+  churchId           String
+  church             Church            @relation(fields: [churchId], references: [id])
+  eventDepts         EventDepartment[]
+  planningDeadline   DateTime?
+  recurrenceRule     String?
+  seriesId           String?
+  isRecurrenceParent Boolean           @default(false)
+  createdAt          DateTime          @default(now())
 
   @@map("events")
 }
@@ -170,6 +176,7 @@ model EventDepartment {
   event        Event      @relation(fields: [eventId], references: [id])
   department   Department @relation(fields: [departmentId], references: [id])
   plannings    Planning[]
+  tasks        Task[]
 
   @@unique([eventId, departmentId])
   @@map("event_departments")
@@ -193,4 +200,28 @@ model Planning {
 
   @@unique([eventDepartmentId, memberId])
   @@map("plannings")
+}
+
+model Task {
+  id                String           @id @default(cuid())
+  eventDepartmentId String
+  name              String
+  description       String?          @db.Text
+  eventDepartment   EventDepartment  @relation(fields: [eventDepartmentId], references: [id])
+  assignments       TaskAssignment[]
+  createdAt         DateTime         @default(now())
+
+  @@map("tasks")
+}
+
+model TaskAssignment {
+  id         String   @id @default(cuid())
+  taskId     String
+  memberId   String
+  task       Task     @relation(fields: [taskId], references: [id])
+  member     Member   @relation(fields: [memberId], references: [id])
+  assignedAt DateTime @default(now())
+
+  @@unique([taskId, memberId])
+  @@map("task_assignments")
 }

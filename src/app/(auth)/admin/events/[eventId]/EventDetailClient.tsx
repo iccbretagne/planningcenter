@@ -65,7 +65,7 @@ export default function EventDetailClient({ eventId, departments }: Props) {
           <Button variant="secondary">&larr; Retour aux evenements</Button>
         </Link>
         <Link href={`/events/${eventId}/star-view`}>
-          <Button>Voir STAR en service</Button>
+          <Button>Voir planning des STAR</Button>
         </Link>
       </div>
 
@@ -73,7 +73,7 @@ export default function EventDetailClient({ eventId, departments }: Props) {
         Départements associés
       </h2>
 
-      <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(grouped).map(([ministry, deps]) => (
           <div key={ministry} className="bg-white rounded-lg shadow p-4">
             <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">
