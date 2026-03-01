@@ -119,7 +119,7 @@ export default function MonthlyPlanningView({ departmentId }: Props) {
                   {event.members.map((member) => (
                     <li key={member.id} className="text-sm text-gray-700">
                       {member.status === "EN_SERVICE_DEBRIEF" && (
-                        <svg className="inline-block w-4 h-4 mr-1 text-icc-violet align-text-bottom" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" title="Debrief">
+                        <svg className="inline-block w-4 h-4 mr-1 text-icc-violet align-text-bottom" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                           <path d="M12 2C6.48 2 2 5.58 2 10c0 2.24 1.12 4.27 2.94 5.72L3 22l5.34-2.56C9.5 19.8 10.72 20 12 20c5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
                         </svg>
                       )}
