@@ -24,6 +24,7 @@ declare module "next-auth" {
         id: string;
         churchId: string;
         role: Role;
+        ministryId: string | null;
         church: { id: string; name: string; slug: string };
         departments: {
           department: { id: string; name: string };
@@ -78,6 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         where: { userId: user.id },
         include: {
           church: { select: { id: true, name: true, slug: true } },
+          ministry: { select: { id: true } },
           departments: {
             include: {
               department: { select: { id: true, name: true } },
@@ -86,7 +88,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
       });
 
-      session.user.churchRoles = churchRoles;
+      // For MINISTER roles with a ministryId, load all departments of the ministry
+      const ministerDeptMap = new Map<string, { id: string; name: string }[]>();
+      for (const cr of churchRoles) {
+        if (cr.role === "MINISTER" && cr.ministryId) {
+          const ministryDepts = await prisma.department.findMany({
+            where: { ministryId: cr.ministryId },
+            select: { id: true, name: true },
+          });
+          ministerDeptMap.set(cr.id, ministryDepts);
+        }
+      }
+
+      session.user.churchRoles = churchRoles.map((cr) => {
+        const extraDepts = ministerDeptMap.get(cr.id);
+        let departments = cr.departments.map((d) => ({ department: d.department }));
+        if (extraDepts) {
+          const existingIds = new Set(departments.map((d) => d.department.id));
+          for (const dept of extraDepts) {
+            if (!existingIds.has(dept.id)) {
+              departments.push({ department: dept });
+            }
+          }
+        }
+        return {
+          ...cr,
+          ministryId: cr.ministry?.id ?? null,
+          departments,
+        };
+      });
 
       return session;
     },

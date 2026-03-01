@@ -152,7 +152,7 @@ export default function StarViewClient({ eventId }: Props) {
           <h1 className="text-xl font-bold text-icc-violet uppercase tracking-wider">
             STAR EN SERVICE
           </h1>
-          <div className="text-lg font-bold text-icc-jaune">
+          <div className="text-lg font-bold text-icc-violet">
             {data.totalStars} STAR
           </div>
         </div>
@@ -172,7 +172,7 @@ export default function StarViewClient({ eventId }: Props) {
               key={dept.id}
               className="border border-gray-200 rounded-lg p-4"
             >
-              <h3 className="text-sm font-bold text-icc-jaune uppercase mb-2 tracking-wide">
+              <h3 className="text-sm font-bold text-icc-violet uppercase mb-2 tracking-wide">
                 {dept.name}
               </h3>
               {dept.members.length === 0 ? (
@@ -187,12 +187,9 @@ export default function StarViewClient({ eventId }: Props) {
                       className="text-sm font-semibold text-gray-800"
                     >
                       {member.status === "EN_SERVICE_DEBRIEF" && (
-                        <span
-                          className="text-icc-jaune mr-1"
-                          title="Debrief"
-                        >
-                          &#x2298;
-                        </span>
+                        <svg className="inline-block w-4 h-4 mr-1 text-icc-violet align-text-bottom" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" title="Debrief">
+                          <path d="M12 2C6.48 2 2 5.58 2 10c0 2.24 1.12 4.27 2.94 5.72L3 22l5.34-2.56C9.5 19.8 10.72 20 12 20c5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+                        </svg>
                       )}
                       {member.firstName} {member.lastName}
                       {member.status === "REMPLACANT" && (

@@ -49,7 +49,7 @@ export default async function MembersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Membres</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">STAR</h1>
       <MembersClient
         initialMembers={members}
         departments={departments.map((d) => ({

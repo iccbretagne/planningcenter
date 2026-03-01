@@ -1,18 +1,28 @@
-import { requirePermission } from "@/lib/auth";
+import { requirePermission, getUserDepartmentScope } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import DepartmentsClient from "./DepartmentsClient";
 
 export default async function DepartmentsPage() {
   const session = await requirePermission("departments:manage");
 
+  const scope = getUserDepartmentScope(session);
   const churchRoles = session.user.churchRoles;
   const isSuperAdmin = churchRoles.some((r) => r.role === "SUPER_ADMIN");
   const churchIds = Array.from(new Set(churchRoles.map((r) => r.churchId)));
 
+  // For scoped users (MINISTER), get their ministryIds
+  const ministerMinistryIds = churchRoles
+    .filter((r) => r.role === "MINISTER" && r.ministryId)
+    .map((r) => r.ministryId as string);
+
+  const departmentWhere = isSuperAdmin
+    ? undefined
+    : scope.scoped && ministerMinistryIds.length > 0
+      ? { ministryId: { in: ministerMinistryIds } }
+      : { ministry: { churchId: { in: churchIds } } };
+
   const departments = await prisma.department.findMany({
-    where: isSuperAdmin
-      ? undefined
-      : { ministry: { churchId: { in: churchIds } } },
+    where: departmentWhere,
     include: {
       ministry: { select: { id: true, name: true, churchId: true } },
       _count: { select: { members: true } },
@@ -20,10 +30,14 @@ export default async function DepartmentsPage() {
     orderBy: [{ ministry: { name: "asc" } }, { name: "asc" }],
   });
 
+  const ministryWhere = isSuperAdmin
+    ? undefined
+    : ministerMinistryIds.length > 0
+      ? { id: { in: ministerMinistryIds } }
+      : { churchId: { in: churchIds } };
+
   const ministries = await prisma.ministry.findMany({
-    where: isSuperAdmin
-      ? undefined
-      : { churchId: { in: churchIds } },
+    where: ministryWhere,
     include: { church: { select: { id: true, name: true } } },
     orderBy: [{ church: { name: "asc" } }, { name: "asc" }],
   });
