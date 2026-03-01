@@ -64,7 +64,7 @@ export default function DepartmentsClient({
         ? `/api/departments/${editing.id}`
         : "/api/departments";
       const method = editing ? "PUT" : "POST";
-      const body = editing ? { name } : { name, ministryId };
+      const body = { name, ministryId };
 
       const res = await fetch(url, {
         method,
@@ -245,17 +245,15 @@ export default function DepartmentsClient({
             onChange={(e) => setName(e.target.value)}
             required
           />
-          {!editing && (
-            <Select
-              label="Ministère"
-              value={ministryId}
-              onChange={(e) => setMinistryId(e.target.value)}
-              options={ministries.map((m) => ({
-                value: m.id,
-                label: `${m.name} (${m.churchName})`,
-              }))}
-            />
-          )}
+          <Select
+            label="Ministère"
+            value={ministryId}
+            onChange={(e) => setMinistryId(e.target.value)}
+            options={ministries.map((m) => ({
+              value: m.id,
+              label: `${m.name} (${m.churchName})`,
+            }))}
+          />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-end gap-2">
             <Button

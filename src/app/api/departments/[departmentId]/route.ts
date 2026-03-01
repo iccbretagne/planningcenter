@@ -28,6 +28,7 @@ async function checkDepartmentScope(session: Session, departmentId: string) {
 
 const updateSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
+  ministryId: z.string().min(1, "Le ministère est requis"),
 });
 
 export async function PUT(
@@ -40,6 +41,11 @@ export async function PUT(
     await checkDepartmentScope(session, departmentId);
     const body = await request.json();
     const data = updateSchema.parse(body);
+
+    const allowedMinistries = getMinisterMinistryIds(session);
+    if (allowedMinistries !== null && !allowedMinistries.includes(data.ministryId)) {
+      throw new ApiError(403, "Vous ne pouvez déplacer un département que vers votre ministère");
+    }
 
     const department = await prisma.department.update({
       where: { id: departmentId },
