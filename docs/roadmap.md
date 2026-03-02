@@ -41,9 +41,9 @@
 
 ## Planning
 
-- [ ] Section planification des departements : filtre par mois pour les evenements
-- [ ] Section planification des departements : export du planning mensuel en PDF ou image
-- [ ] Vue planning des departements : selecteur de mois
+- [x] Section planification des departements : filtre par mois pour les evenements
+- [x] Section planification des departements : export du planning mensuel en PDF ou image
+- [x] Vue planning des departements : selecteur de mois
 - [ ] Notion de tache/affectation : permettre aux responsables de departements d'affecter leurs STAR a une activite (visible dans la vue planning des departements, non visible dans la vue planning des STAR)
 - [ ] Creation d'evenements avec recurrence (hebdomadaire, mensuel, etc.)
 - [ ] Gestion facilitee des departements en service pour les evenements recurrents

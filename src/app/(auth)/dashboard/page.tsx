@@ -63,6 +63,15 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     }
   }
 
+  // Fetch department name (for month view PDF export)
+  const selectedDepartment =
+    view === "month" && selectedDeptId
+      ? await prisma.department.findUnique({
+          where: { id: selectedDeptId },
+          select: { name: true },
+        })
+      : null;
+
   // Fetch events for the church (needed for event view)
   const events =
     view === "event"
@@ -100,7 +109,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
 
       {view === "month" ? (
         selectedDeptId ? (
-          <MonthlyPlanningView departmentId={selectedDeptId} />
+          <MonthlyPlanningView departmentId={selectedDeptId} departmentName={selectedDepartment?.name} />
         ) : (
           <div className="p-8 text-center text-gray-400 border-2 border-gray-200 border-dashed rounded-lg">
             Sélectionnez un département dans la barre latérale
