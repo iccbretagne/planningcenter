@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { auth, signOut, getCurrentChurchId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasPermission } from "@/lib/permissions";
-import Sidebar from "@/components/Sidebar";
 import ChurchSwitcher from "@/components/ChurchSwitcher";
+import AuthLayoutShell from "@/components/AuthLayoutShell";
 
 const adminLinks = [
   { href: "/admin/churches", label: "Églises", permissions: ["church:manage"] },
@@ -68,64 +68,67 @@ export default async function AuthLayout({
     .filter((link) => link.permissions.some((p) => userPermissions.has(p)))
     .map(({ href, label }) => ({ href, label }));
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-icc-violet border-b-2 border-icc-violet-dark">
-        <div className="flex items-center justify-between px-6 py-4 mx-auto max-w-7xl">
-          <div>
-            <h1 className="text-xl font-bold text-white">PlanningCenter</h1>
-            {currentChurchId && churches.length > 1 ? (
-              <ChurchSwitcher churches={churches} currentChurchId={currentChurchId} />
-            ) : (
-              <p className="text-sm text-white/70">{churchName}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            {session.user.image && (
-              <img
-                src={session.user.image}
-                alt={session.user.name || ""}
-                className="w-8 h-8 rounded-full"
-              />
-            )}
-            <span className="text-sm text-white">{session.user.name}</span>
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/" });
-              }}
-            >
-              <button
-                type="submit"
-                className="px-3 py-1 text-sm text-white/80 border border-white/30 rounded-md hover:bg-white/10 transition-colors"
-              >
-                Déconnexion
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex mx-auto max-w-7xl">
-        <Sidebar
-          departments={allDepartments}
-          adminLinks={visibleAdminLinks}
-        />
-
-        <main className="flex-1 p-6">{children}</main>
+  const headerContent = (
+    <>
+      <div className="min-w-0">
+        <h1 className="text-lg md:text-xl font-bold text-white truncate">PlanningCenter</h1>
+        {currentChurchId && churches.length > 1 ? (
+          <ChurchSwitcher churches={churches} currentChurchId={currentChurchId} />
+        ) : (
+          <p className="text-xs md:text-sm text-white/70 truncate">{churchName}</p>
+        )}
       </div>
-
-      <footer className="py-4 text-center text-xs text-gray-400">
-        <a
-          href="https://github.com/iccbretagne/planningcenter"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-gray-600 transition-colors"
+      <div className="flex items-center gap-2 md:gap-4 ml-auto">
+        {session.user.image && (
+          <img
+            src={session.user.image}
+            alt={session.user.name || ""}
+            className="w-8 h-8 rounded-full"
+          />
+        )}
+        <span className="hidden sm:inline text-sm text-white">{session.user.name}</span>
+        <form
+          action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/" });
+          }}
         >
-          PlanningCenter
-        </a>{" "}
-        <span>v{pkg.version}</span>
-      </footer>
-    </div>
+          <button
+            type="submit"
+            className="px-2 py-1 md:px-3 text-sm text-white/80 border border-white/30 rounded-md hover:bg-white/10 transition-colors"
+          >
+            <span className="hidden sm:inline">Déconnexion</span>
+            <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </>
+  );
+
+  const footerContent = (
+    <footer className="py-4 text-center text-xs text-gray-400">
+      <a
+        href="https://github.com/iccbretagne/planningcenter"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-gray-600 transition-colors"
+      >
+        PlanningCenter
+      </a>{" "}
+      <span>v{pkg.version}</span>
+    </footer>
+  );
+
+  return (
+    <AuthLayoutShell
+      departments={allDepartments}
+      adminLinks={visibleAdminLinks}
+      header={headerContent}
+      footer={footerContent}
+    >
+      {children}
+    </AuthLayoutShell>
   );
 }

@@ -7,6 +7,7 @@ import { useSearchParams, usePathname } from "next/navigation";
 interface SidebarProps {
   departments: { id: string; name: string }[];
   adminLinks: { href: string; label: string }[];
+  onClose?: () => void;
 }
 
 /* ── Icones SVG ─────────────────────────────────────────── */
@@ -91,6 +92,7 @@ function AccordionSection({
 export default function Sidebar({
   departments,
   adminLinks,
+  onClose,
 }: SidebarProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -101,7 +103,7 @@ export default function Sidebar({
   const isAdminActive = pathname.startsWith("/admin");
 
   return (
-    <aside className="w-64 min-h-[calc(100vh-73px)] bg-white border-r border-gray-200 p-4 space-y-1">
+    <aside className="w-64 min-h-0 md:min-h-[calc(100vh-73px)] bg-white border-r border-gray-200 p-4 space-y-1 overflow-y-auto">
       {/* Départements */}
       <AccordionSection
         title="Départements"
@@ -119,6 +121,7 @@ export default function Sidebar({
               <Link
                 key={dept.id}
                 href={`/dashboard?dept=${dept.id}`}
+                onClick={onClose}
                 className={`block w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors ${
                   activeDept === dept.id
                     ? "bg-icc-violet-light text-icc-violet font-medium"
@@ -135,6 +138,7 @@ export default function Sidebar({
       {/* Evenements */}
       <Link
         href="/events"
+        onClick={onClose}
         className={`${sectionHeaderBase} ${isEventsActive ? sectionHeaderActive : sectionHeaderIdle} rounded-md`}
       >
         <IconCalendar className="w-4 h-4" />
@@ -153,6 +157,7 @@ export default function Sidebar({
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={onClose}
                 className={`block w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors ${
                   pathname === link.href
                     ? "bg-icc-violet-light text-icc-violet font-medium"
