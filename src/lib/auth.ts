@@ -19,6 +19,7 @@ declare module "next-auth" {
       id: string;
       email: string;
       name: string | null;
+      displayName: string | null;
       image: string | null;
       churchRoles: {
         id: string;
@@ -74,6 +75,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, user }) {
       session.user.id = user.id;
+
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { displayName: true },
+      });
+      session.user.displayName = dbUser?.displayName ?? null;
 
       const churchRoles = await prisma.userChurchRole.findMany({
         where: { userId: user.id },

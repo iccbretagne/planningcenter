@@ -236,10 +236,10 @@ export default function EventsClient({ initialEvents, churches }: Props) {
           actions={(ev) => (
             <div className="flex gap-2 justify-end">
               <Link href={`/events/${ev.id}/star-view`}>
-                <Button variant="secondary">STAR</Button>
+                <Button variant="secondary">Planning des STAR</Button>
               </Link>
               <Link href={`/admin/events/${ev.id}`}>
-                <Button variant="secondary">Détail</Button>
+                <Button variant="secondary">Dép. en service</Button>
               </Link>
               <Button variant="secondary" onClick={() => openEdit(ev)}>
                 Modifier

@@ -59,6 +59,7 @@ export default async function UsersPage() {
           id: u.id,
           email: u.email,
           name: u.name,
+          displayName: u.displayName,
           image: u.image,
           churchRoles: u.churchRoles.map((r) => ({
             id: r.id,

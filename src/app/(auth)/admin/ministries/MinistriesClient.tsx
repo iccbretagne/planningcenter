@@ -17,11 +17,13 @@ interface Ministry {
 interface Props {
   initialMinistries: Ministry[];
   churches: { id: string; name: string }[];
+  readOnly?: boolean;
 }
 
 export default function MinistriesClient({
   initialMinistries,
   churches,
+  readOnly,
 }: Props) {
   const [ministries, setMinistries] = useState(initialMinistries);
   const [modalOpen, setModalOpen] = useState(false);
@@ -178,9 +180,11 @@ export default function MinistriesClient({
 
   return (
     <>
-      <div className="mb-4">
-        <Button onClick={openCreate}>Nouveau ministère</Button>
-      </div>
+      {!readOnly && (
+        <div className="mb-4">
+          <Button onClick={openCreate}>Nouveau ministère</Button>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow">
         <DataTable
@@ -193,10 +197,10 @@ export default function MinistriesClient({
           ]}
           data={ministries}
           emptyMessage="Aucun ministère."
-          selectable
+          selectable={!readOnly}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          actions={(m) => (
+          actions={readOnly ? undefined : (m) => (
             <div className="flex gap-2 justify-end">
               <Button variant="secondary" onClick={() => openEdit(m)}>
                 Modifier
@@ -209,12 +213,14 @@ export default function MinistriesClient({
         />
       </div>
 
-      <BulkActionBar
-        count={selectedIds.size}
-        onEdit={openBulkEdit}
-        onDelete={handleBulkDelete}
-        onClear={() => setSelectedIds(new Set())}
-      />
+      {!readOnly && (
+        <BulkActionBar
+          count={selectedIds.size}
+          onEdit={openBulkEdit}
+          onDelete={handleBulkDelete}
+          onClear={() => setSelectedIds(new Set())}
+        />
+      )}
 
       <Modal
         open={modalOpen}
