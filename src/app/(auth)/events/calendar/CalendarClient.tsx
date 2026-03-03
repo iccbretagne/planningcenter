@@ -31,11 +31,6 @@ export default function CalendarClient({ events }: Props) {
     );
   }
 
-  const monthLabel = new Date(year, month - 1, 1).toLocaleDateString("fr-FR", {
-    month: "long",
-    year: "numeric",
-  });
-
   // Build calendar grid
   const calendarDays = useMemo(() => {
     const firstDay = new Date(year, month - 1, 1);
@@ -98,12 +93,15 @@ export default function CalendarClient({ events }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* Month navigation */}
+      <div className="flex items-center justify-center gap-2 mb-6">
         <button
           onClick={() => navigateMonth(-1)}
-          className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-700"
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-icc-violet hover:bg-icc-violet-light transition-colors"
         >
-          &larr;
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
         <input
           type="month"
@@ -111,23 +109,26 @@ export default function CalendarClient({ events }: Props) {
           onChange={(e) => {
             if (e.target.value) setCurrentMonth(e.target.value);
           }}
-          className="text-lg font-semibold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer text-center capitalize"
+          className="px-4 py-2 text-lg font-semibold text-icc-violet bg-icc-violet-light border-2 border-icc-violet/20 rounded-lg cursor-pointer text-center capitalize focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
         />
         <button
           onClick={() => navigateMonth(1)}
-          className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-700"
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-icc-violet hover:bg-icc-violet-light transition-colors"
         >
-          &rarr;
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* Calendar */}
+      <div className="bg-white rounded-xl shadow-md border-2 border-gray-100 overflow-hidden">
         {/* Day headers */}
-        <div className="grid grid-cols-7 border-b">
+        <div className="grid grid-cols-7 bg-icc-violet">
           {DAYS_FR.map((day) => (
             <div
               key={day}
-              className="px-2 py-2 text-xs font-semibold text-gray-500 text-center"
+              className="px-2 py-3 text-xs font-bold text-white text-center uppercase tracking-wider"
             >
               {day}
             </div>
@@ -143,27 +144,36 @@ export default function CalendarClient({ events }: Props) {
             return (
               <div
                 key={idx}
-                className={`min-h-[80px] md:min-h-[100px] border-b border-r p-1 ${
-                  day.inMonth ? "bg-white" : "bg-gray-50"
+                className={`min-h-[80px] md:min-h-[110px] border-b border-r border-gray-100 p-1.5 transition-colors ${
+                  day.inMonth
+                    ? isToday
+                      ? "bg-icc-violet-light/50"
+                      : "bg-white hover:bg-gray-50"
+                    : "bg-gray-50/50"
                 }`}
               >
-                <div
-                  className={`text-xs font-medium mb-1 ${
-                    isToday
-                      ? "bg-icc-violet text-white w-6 h-6 rounded-full flex items-center justify-center"
-                      : day.inMonth
-                        ? "text-gray-700"
-                        : "text-gray-300"
-                  }`}
-                >
-                  {day.date}
+                <div className="flex items-start justify-between">
+                  <span
+                    className={`inline-flex items-center justify-center text-xs font-semibold mb-1 ${
+                      isToday
+                        ? "bg-icc-violet text-white w-7 h-7 rounded-full shadow-sm"
+                        : day.inMonth
+                          ? "text-gray-700 w-7 h-7"
+                          : "text-gray-300 w-7 h-7"
+                    }`}
+                  >
+                    {day.date}
+                  </span>
+                  {dayEvents.length > 0 && !isToday && (
+                    <span className="w-2 h-2 rounded-full bg-icc-violet mt-1" />
+                  )}
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   {dayEvents.map((ev) => (
                     <Link
                       key={ev.id}
                       href={`/events/${ev.id}/star-view`}
-                      className="block px-1 py-0.5 text-xs rounded bg-icc-violet/10 text-icc-violet hover:bg-icc-violet/20 truncate"
+                      className="block px-1.5 py-1 text-xs font-medium rounded-md bg-icc-violet/10 text-icc-violet hover:bg-icc-violet hover:text-white transition-colors truncate"
                       title={`${ev.title} (${ev.type})`}
                     >
                       {ev.title}

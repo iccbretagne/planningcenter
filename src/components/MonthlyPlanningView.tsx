@@ -115,12 +115,14 @@ export default function MonthlyPlanningView({ departmentId, departmentName }: Pr
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-center gap-2 mb-6">
         <button
           onClick={() => navigateMonth(-1)}
-          className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-700"
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-icc-violet hover:bg-icc-violet-light transition-colors"
         >
-          &larr;
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
         <input
           type="month"
@@ -128,13 +130,15 @@ export default function MonthlyPlanningView({ departmentId, departmentName }: Pr
           onChange={(e) => {
             if (e.target.value) setCurrentMonth(e.target.value);
           }}
-          className="text-lg font-semibold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer text-center"
+          className="px-4 py-2 text-lg font-semibold text-icc-violet bg-icc-violet-light border-2 border-icc-violet/20 rounded-lg cursor-pointer text-center capitalize focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
         />
         <button
           onClick={() => navigateMonth(1)}
-          className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-700"
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-icc-violet hover:bg-icc-violet-light transition-colors"
         >
-          &rarr;
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
 

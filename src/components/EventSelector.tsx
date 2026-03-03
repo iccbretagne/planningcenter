@@ -55,13 +55,13 @@ export default function EventSelector({
         type="month"
         value={monthFilter}
         onChange={(e) => setMonthFilter(e.target.value)}
-        className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-icc-violet"
+        className="w-full px-3 py-2.5 md:py-2 mb-2 border-2 border-gray-300 rounded-lg shadow-sm text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
         placeholder="Filtrer par mois"
       />
       <select
         value={selectedEventId || ""}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-icc-violet"
+        className="w-full px-3 py-2.5 md:py-2 border-2 border-gray-300 rounded-lg shadow-sm text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
       >
         <option value="" disabled>
           Choisir un evenement
