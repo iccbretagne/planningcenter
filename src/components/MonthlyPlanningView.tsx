@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface MemberItem {
   id: string;
@@ -18,15 +18,18 @@ interface EventItem {
 
 interface Props {
   departmentId: string;
+  departmentName?: string;
 }
 
-export default function MonthlyPlanningView({ departmentId }: Props) {
+export default function MonthlyPlanningView({ departmentId, departmentName }: Props) {
   const now = new Date();
   const [currentMonth, setCurrentMonth] = useState(
     `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
   );
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -71,67 +74,132 @@ export default function MonthlyPlanningView({ departmentId }: Props) {
     });
   }
 
+  async function exportPdf() {
+    if (!printRef.current || exporting) return;
+    setExporting(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("portrait", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgRatio = canvas.height / canvas.width;
+
+      let renderWidth = pdfWidth;
+      let renderHeight = pdfWidth * imgRatio;
+
+      if (renderHeight > pdfHeight) {
+        renderHeight = pdfHeight;
+        renderWidth = pdfHeight / imgRatio;
+      }
+
+      const offsetX = (pdfWidth - renderWidth) / 2;
+      pdf.addImage(imgData, "PNG", offsetX, 0, renderWidth, renderHeight);
+
+      const label = formatMonthLabel(currentMonth);
+      const name = departmentName || "planning";
+      pdf.save(`Planning-${name}-${label}.pdf`);
+    } catch {
+      // ignore export errors
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-center gap-2 mb-6">
         <button
           onClick={() => navigateMonth(-1)}
-          className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-700"
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-icc-violet hover:bg-icc-violet-light transition-colors"
         >
-          &larr;
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
-        <h2 className="text-lg font-semibold text-gray-900 capitalize">
-          {formatMonthLabel(currentMonth)}
-        </h2>
+        <input
+          type="month"
+          value={currentMonth}
+          onChange={(e) => {
+            if (e.target.value) setCurrentMonth(e.target.value);
+          }}
+          className="px-4 py-2 text-lg font-semibold text-icc-violet bg-icc-violet-light border-2 border-icc-violet/20 rounded-lg cursor-pointer text-center capitalize focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
+        />
         <button
           onClick={() => navigateMonth(1)}
-          className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-700"
+          className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-icc-violet hover:bg-icc-violet-light transition-colors"
         >
-          &rarr;
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
 
-      {loading ? (
-        <div className="p-8 text-center text-gray-400">Chargement...</div>
-      ) : events.length === 0 ? (
-        <div className="p-8 text-center text-gray-400 border-2 border-gray-200 border-dashed rounded-lg">
-          Aucun evenement ce mois
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {events.map((event) => (
-            <div
-              key={event.id}
-              className="bg-white rounded-lg shadow p-4"
-            >
-              <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-sm font-medium text-icc-violet capitalize">
-                  {formatEventDate(event.date)}
-                </span>
-                <span className="text-sm text-gray-500">{event.title}</span>
-              </div>
-              {event.members.length === 0 ? (
-                <p className="text-sm text-gray-400 italic">
-                  (aucun STAR en service)
-                </p>
-              ) : (
-                <ul className="space-y-1">
-                  {event.members.map((member) => (
-                    <li key={member.id} className="text-sm text-gray-700">
-                      {member.status === "EN_SERVICE_DEBRIEF" && (
-                        <svg className="inline-block w-4 h-4 mr-1 text-icc-violet align-text-bottom" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <path d="M12 2C6.48 2 2 5.58 2 10c0 2.24 1.12 4.27 2.94 5.72L3 22l5.34-2.56C9.5 19.8 10.72 20 12 20c5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
-                        </svg>
-                      )}
-                      {member.firstName} {member.lastName}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
+      {!loading && events.length > 0 && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={exportPdf}
+            disabled={exporting}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-icc-violet rounded-lg hover:bg-icc-violet/90 disabled:opacity-50"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {exporting ? "Export..." : "Export PDF"}
+          </button>
         </div>
       )}
+
+      <div ref={printRef}>
+        {loading ? (
+          <div className="p-8 text-center text-gray-400">Chargement...</div>
+        ) : events.length === 0 ? (
+          <div className="p-8 text-center text-gray-400 border-2 border-gray-200 border-dashed rounded-lg">
+            Aucun evenement ce mois
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {events.map((event) => (
+              <div
+                key={event.id}
+                className="bg-white rounded-lg shadow p-4"
+              >
+                <div className="flex items-baseline gap-3 mb-2">
+                  <span className="text-sm font-medium text-icc-violet capitalize">
+                    {formatEventDate(event.date)}
+                  </span>
+                  <span className="text-sm text-gray-500">{event.title}</span>
+                </div>
+                {event.members.length === 0 ? (
+                  <p className="text-sm text-gray-400 italic">
+                    (aucun STAR en service)
+                  </p>
+                ) : (
+                  <ul className="space-y-1">
+                    {event.members.map((member) => (
+                      <li key={member.id} className="text-sm text-gray-700">
+                        {member.status === "EN_SERVICE_DEBRIEF" && (
+                          <svg className="inline-block w-4 h-4 mr-1 text-icc-violet align-text-bottom" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2C6.48 2 2 5.58 2 10c0 2.24 1.12 4.27 2.94 5.72L3 22l5.34-2.56C9.5 19.8 10.72 20 12 20c5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+                          </svg>
+                        )}
+                        {member.firstName} {member.lastName}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

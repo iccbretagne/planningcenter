@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 interface Event {
   id: string;
@@ -22,6 +22,7 @@ export default function EventSelector({
   selectedDeptId,
 }: EventSelectorProps) {
   const router = useRouter();
+  const [monthFilter, setMonthFilter] = useState("");
 
   // Auto-select the next upcoming event on first render
   useEffect(() => {
@@ -32,6 +33,11 @@ export default function EventSelector({
       router.replace(`/dashboard?dept=${selectedDeptId}&event=${eventId}`);
     }
   }, [selectedEventId, events, selectedDeptId, router]);
+
+  const filteredEvents = useMemo(() => {
+    if (!monthFilter) return events;
+    return events.filter((e) => e.date.startsWith(monthFilter));
+  }, [events, monthFilter]);
 
   const handleChange = (eventId: string) => {
     const params = new URLSearchParams();
@@ -45,21 +51,33 @@ export default function EventSelector({
       <label className="block mb-1 text-sm font-medium text-gray-700">
         Evenement
       </label>
+      <input
+        type="month"
+        value={monthFilter}
+        onChange={(e) => setMonthFilter(e.target.value)}
+        className="w-full px-3 py-2.5 md:py-2 mb-2 border-2 border-gray-300 rounded-lg shadow-sm text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
+        placeholder="Filtrer par mois"
+      />
       <select
         value={selectedEventId || ""}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full px-3 py-2.5 md:py-2 text-base md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
+        className="w-full px-3 py-2.5 md:py-2 border-2 border-gray-300 rounded-lg shadow-sm text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-icc-violet focus:border-icc-violet"
       >
         <option value="" disabled>
           Choisir un evenement
         </option>
-        {events.map((event) => (
+        {filteredEvents.map((event) => (
           <option key={event.id} value={event.id}>
             {event.title} (
             {new Date(event.date).toLocaleDateString("fr-FR")})
           </option>
         ))}
       </select>
+      {monthFilter && filteredEvents.length === 0 && (
+        <p className="mt-1 text-xs text-gray-400">
+          Aucun evenement pour ce mois
+        </p>
+      )}
     </div>
   );
 }

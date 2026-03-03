@@ -60,6 +60,7 @@ model Church {
   users      UserChurchRole[]
   ministries Ministry[]
   events     Event[]
+  auditLogs  AuditLog[]
 
   @@map("churches")
 }
@@ -79,11 +80,14 @@ model User {
   displayName   String?
   image         String?
   emailVerified DateTime?
+  isSuperAdmin  Boolean          @default(false)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   churchRoles   UserChurchRole[]
   accounts      Account[]
   sessions      Session[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -143,6 +147,8 @@ model Member {
   id              String           @id @default(cuid())
   firstName       String
   lastName        String
+  email           String?
+  phone           String?
   departmentId    String
   department      Department       @relation(fields: [departmentId], references: [id])
   plannings       Planning[]
@@ -224,4 +230,36 @@ model TaskAssignment {
 
   @@unique([taskId, memberId])
   @@map("task_assignments")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  churchId   String?
+  action     String   // CREATE, UPDATE, DELETE
+  entityType String   // Event, Planning, Member, etc.
+  entityId   String
+  details    Json?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  church     Church?  @relation(fields: [churchId], references: [id])
+
+  @@index([churchId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // PLANNING_REMINDER, PLANNING_UPDATED, etc.
+  title     String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, read, createdAt])
+  @@map("notifications")
 }

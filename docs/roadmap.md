@@ -27,7 +27,7 @@
 ## Administration
 
 - [x] Page Super Admin : liste des eglises, creation, suppression
-- [ ] Onboarding nouvelle eglise (creation + invitation admin)
+- [x] Onboarding nouvelle eglise (creation + invitation admin)
 - [x] Gestion des utilisateurs : attribution des roles depuis l'interface
 - [x] Affectation ministere/departements aux roles MINISTER et DEPARTMENT_HEAD
 - [x] Gestion des ministeres et departements (CRUD)
@@ -35,35 +35,35 @@
 - [x] Gestion des membres (ajout, modification, suppression, transfert entre departements)
 - [x] Gestion des evenements (creation, modification, suppression, types personnalises)
 - [x] Association departements-evenements depuis l'interface
-- [ ] Schema dedie Super Admin (role global independant des eglises)
+- [x] Schema dedie Super Admin (role global independant des eglises)
 - [x] Utilisateurs : permettre aux admins, secretaires et utilisateurs de modifier leur nom d'affichage
 - [x] Utilisateurs : recherche par nom ou email + navigation alphabetique dans la liste
 
 ## Planning
 
-- [ ] Section planification des departements : filtre par mois pour les evenements
-- [ ] Section planification des departements : export du planning mensuel en PDF ou image
-- [ ] Vue planning des departements : selecteur de mois
-- [ ] Notion de tache/affectation : permettre aux responsables de departements d'affecter leurs STAR a une activite (visible dans la vue planning des departements, non visible dans la vue planning des STAR)
-- [ ] Creation d'evenements avec recurrence (hebdomadaire, mensuel, etc.)
-- [ ] Gestion facilitee des departements en service pour les evenements recurrents
-- [ ] Vue calendrier des evenements
-- [ ] Duplication d'un planning d'un evenement a un autre
-- [ ] Historique des modifications (audit log)
-- [ ] Date/heure limite de planification par evenement : avant echeance, seuls les responsables de departement, leurs ministres et les admins peuvent modifier le planning ; apres echeance, seuls les admins et secretaires conservent la main
+- [x] Section planification des departements : filtre par mois pour les evenements
+- [x] Section planification des departements : export du planning mensuel en PDF ou image
+- [x] Vue planning des departements : selecteur de mois
+- [x] Notion de tache/affectation : permettre aux responsables de departements d'affecter leurs STAR a une activite (visible dans la vue planning des departements, non visible dans la vue planning des STAR)
+- [x] Creation d'evenements avec recurrence (hebdomadaire, mensuel, etc.)
+- [x] Gestion facilitee des departements en service pour les evenements recurrents
+- [x] Vue calendrier des evenements
+- [x] Duplication d'un planning d'un evenement a un autre
+- [x] Historique des modifications (audit log)
+- [x] Date/heure limite de planification par evenement : avant echeance, seuls les responsables de departement, leurs ministres et les admins peuvent modifier le planning ; apres echeance, seuls les admins et secretaires conservent la main
 - [x] Export PDF du planning par evenement / departement
 
 ## Notifications
 
-- [ ] Notifications email pour rappels de service (J-3, J-1)
+- [x] Notifications email pour rappels de service (J-3, J-1)
 - [ ] Integration WhatsApp (API Business)
-- [ ] Notifications in-app (badge, toast)
+- [x] Notifications in-app (badge, toast)
 
 ## Statistiques
 
-- [ ] Taux de presence par membre et departement
-- [ ] Nombre de services par membre sur une periode
-- [ ] Dashboard avec graphiques de tendances
+- [x] Taux de presence par membre et departement
+- [x] Nombre de services par membre sur une periode
+- [x] Dashboard avec graphiques de tendances
 
 ## Technique
 
@@ -74,6 +74,6 @@
 - [x] Affichage de la version dans le footer
 - [ ] Deploiement production (Docker multi-stage + reverse proxy)
 - [ ] Migrations Prisma (remplacer `db push` par `prisma migrate`)
-- [ ] PWA (manifest, service worker, installation mobile)
-- [ ] Rate limiting sur les API routes
-- [ ] Logs structures (pino ou similaire)
+- [x] PWA (manifest, service worker, installation mobile)
+- [x] Rate limiting sur les API routes
+- [x] Logs structures (pino ou similaire)

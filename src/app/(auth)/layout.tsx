@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { hasPermission } from "@/lib/permissions";
 import ChurchSwitcher from "@/components/ChurchSwitcher";
 import AuthLayoutShell from "@/components/AuthLayoutShell";
+import NotificationBell from "@/components/NotificationBell";
 
 const adminLinks = [
   { href: "/admin/churches", label: "Églises", permissions: ["church:manage"] },
@@ -13,6 +14,7 @@ const adminLinks = [
   { href: "/admin/departments", label: "Départements", permissions: ["departments:manage"] },
   { href: "/admin/members", label: "STAR", permissions: ["members:manage", "members:view"] },
   { href: "/admin/events", label: "Événements", permissions: ["events:manage"] },
+  { href: "/admin/audit-logs", label: "Historique", permissions: ["church:manage"] },
 ];
 
 export default async function AuthLayout({
@@ -79,6 +81,7 @@ export default async function AuthLayout({
         )}
       </div>
       <div className="flex items-center gap-2 md:gap-4 ml-auto">
+        <NotificationBell />
         {session.user.image && (
           <img
             src={session.user.image}
