@@ -74,6 +74,6 @@
 - [x] Affichage de la version dans le footer
 - [ ] Deploiement production (Docker multi-stage + reverse proxy)
 - [ ] Migrations Prisma (remplacer `db push` par `prisma migrate`)
-- [ ] PWA (manifest, service worker, installation mobile)
-- [ ] Rate limiting sur les API routes
-- [ ] Logs structures (pino ou similaire)
+- [x] PWA (manifest, service worker, installation mobile)
+- [x] Rate limiting sur les API routes
+- [x] Logs structures (pino ou similaire)
