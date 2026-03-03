@@ -61,9 +61,9 @@
 
 ## Statistiques
 
-- [ ] Taux de presence par membre et departement
-- [ ] Nombre de services par membre sur une periode
-- [ ] Dashboard avec graphiques de tendances
+- [x] Taux de presence par membre et departement
+- [x] Nombre de services par membre sur une periode
+- [x] Dashboard avec graphiques de tendances
 
 ## Technique
 
