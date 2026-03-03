@@ -6,6 +6,36 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.4.0] - 2026-03-03
+
+### Ajoute
+
+- Evenements recurrents : creation hebdomadaire/bi-hebdomadaire/mensuelle avec gestion par serie
+- Date/heure limite de planification : echeance par evenement, lecture seule apres echeance
+- Duplication d'un planning d'un evenement vers un autre
+- Taches/affectations par departement (TaskPanel dans la grille planning)
+- Vue calendrier des evenements avec grille mensuelle interactive
+- Historique des modifications (audit log) avec page admin dediee
+- Notifications in-app avec cloche, badge et polling (marquer tout comme lu)
+- Notifications email (rappels J-3, J-1) via nodemailer et route cron
+- Super Admin global (`isSuperAdmin` sur User) avec bypass permissions
+- Onboarding nouvelle eglise (formulaire admin avec invitation)
+- Statistiques par departement : taux de presence, services par membre, graphiques recharts
+- Filtre par mois dans le selecteur d'evenements
+- Selecteur de mois direct dans la vue planning mensuelle
+- Export PDF du planning mensuel
+- Rate limiting sur les API routes
+- Logs structures avec pino
+- PWA : manifest, service worker (network-first), installation mobile
+- Responsive mobile R3 : vues metier adaptees (cartes, grilles)
+
+### Ameliore
+
+- Calendrier et date pickers harmonises avec le theme ICC (accent-color violet, en-tetes colores, hover/today)
+- Inputs date/month/select alignes sur le design system (border-2, rounded-lg, shadow-sm, focus ring violet)
+- Navigation mois avec icones SVG et boutons tactiles (min 44x44px)
+- Sidebar : section Evenements avec sous-menu Liste + Calendrier
+
 ## [v0.3.1] - 2026-03-01
 
 ### Ajoute
