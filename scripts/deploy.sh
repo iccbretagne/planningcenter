@@ -22,7 +22,7 @@ tar xzf "planningcenter-${VERSION}.tar.gz"
 rm "planningcenter-${VERSION}.tar.gz"
 
 # 3. Lier le fichier .env
-ln -s "$DEPLOY_PATH/shared/.env" "$DEPLOY_PATH/releases/planningcenter-${VERSION}/.env"
+ln -sf "$DEPLOY_PATH/shared/.env" "$DEPLOY_PATH/releases/planningcenter-${VERSION}/.env"
 
 # 4. Installer les dependances et construire
 cd "$DEPLOY_PATH/releases/planningcenter-${VERSION}"
