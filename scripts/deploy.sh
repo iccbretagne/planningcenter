@@ -27,7 +27,7 @@ ln -s "$DEPLOY_PATH/shared/.env" "$DEPLOY_PATH/releases/planningcenter-${VERSION
 # 4. Installer les dependances et construire
 cd "$DEPLOY_PATH/releases/planningcenter-${VERSION}"
 npm install --production=false
-npx prisma migrate deploy
+npx prisma db push
 npm run build
 
 # 5. Activer la release (basculer le symlink)
