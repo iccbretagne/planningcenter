@@ -10,6 +10,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ajoute
 
+- Modification en serie des evenements recurrents : modal de choix (cet evenement / toute la serie)
+- Propagation de l'heure et du type a toute la serie avec gestion du changement d'heure (DST)
+- Delai de planification intelligent : selecteur de delai (6h a 7j) avec pre-remplissage automatique
+- Calcul de deadline relative par occurrence lors de la creation et modification en serie
+- Taches permanentes par departement avec affectation par evenement
+- Filtres evenements : recherche textuelle, filtre par mois (defaut : mois courant)
 - Infrastructure de tests Vitest avec couverture V8
 - Tests unitaires : permissions RBAC (10 tests), helpers API (9 tests)
 - Tests API : departments (9 tests), events (8 tests), planning (8 tests)
@@ -20,8 +26,16 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ameliore
 
+- Champ date des evenements en datetime-local (date + heure)
+- Affichage date+heure dans le tableau des evenements
+- Correction du decalage timezone (UTC vs heure locale) dans les formulaires
+- Variants Button (edit, info) et corrections DataTable
 - Documentation base de donnees : workflow migrations dev/production
 - Roadmap : items responsive (R1-R4) marques comme implementes
+
+### Corrige
+
+- Variable inutilisee dans cron/reminders (finding CodeQL)
 
 ## [v0.4.0] - 2026-03-03
 
