@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
 
 interface MemberItem {
   id: string;
   firstName: string;
   lastName: string;
   status: "EN_SERVICE" | "EN_SERVICE_DEBRIEF";
+  tasks: string[];
 }
 
 interface EventItem {
@@ -175,7 +177,12 @@ export default function MonthlyPlanningView({ departmentId, departmentName }: Pr
                   <span className="text-sm font-medium text-icc-violet capitalize">
                     {formatEventDate(event.date)}
                   </span>
-                  <span className="text-sm text-gray-500">{event.title}</span>
+                  <Link
+                    href={`/dashboard?dept=${departmentId}&event=${event.id}&view=event`}
+                    className="text-sm text-gray-500 hover:text-icc-violet hover:underline transition-colors"
+                  >
+                    {event.title}
+                  </Link>
                 </div>
                 {event.members.length === 0 ? (
                   <p className="text-sm text-gray-400 italic">
@@ -191,6 +198,11 @@ export default function MonthlyPlanningView({ departmentId, departmentName }: Pr
                           </svg>
                         )}
                         {member.firstName} {member.lastName}
+                        {member.tasks.length > 0 && (
+                          <span className="ml-1.5 text-xs text-icc-violet">
+                            ({member.tasks.join(", ")})
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>
