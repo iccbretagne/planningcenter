@@ -27,6 +27,42 @@ interface Props {
   churches: { id: string; name: string }[];
 }
 
+const DEADLINE_OFFSETS = [
+  { value: "6h", label: "6 heures avant" },
+  { value: "12h", label: "12 heures avant" },
+  { value: "1d", label: "1 jour avant" },
+  { value: "2d", label: "2 jours avant" },
+  { value: "3d", label: "3 jours avant" },
+  { value: "5d", label: "5 jours avant" },
+  { value: "7d", label: "1 semaine avant" },
+  { value: "", label: "Personnalisé / Aucun" },
+];
+
+/** Format a Date or ISO string as YYYY-MM-DDTHH:mm in local timezone (for datetime-local inputs) */
+function toLocalDatetime(input: string | Date): string {
+  const d = input instanceof Date ? input : new Date(input);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function computeDeadline(eventDate: string, offset: string): string {
+  if (!eventDate || !offset) return "";
+  const match = offset.match(/^(\d+)(h|d)$/);
+  if (!match) return "";
+
+  const d = new Date(eventDate);
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+
+  if (unit === "h") {
+    d.setHours(d.getHours() - value);
+  } else if (unit === "d") {
+    d.setDate(d.getDate() - value);
+  }
+
+  return toLocalDatetime(d);
+}
+
 export default function EventsClient({ initialEvents, churches }: Props) {
   const [events, setEvents] = useState(initialEvents);
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,6 +74,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
   const [planningDeadline, setPlanningDeadline] = useState("");
   const [recurrenceRule, setRecurrenceRule] = useState("");
   const [recurrenceEnd, setRecurrenceEnd] = useState("");
+  const [deadlineOffset, setDeadlineOffset] = useState("2d");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -52,8 +89,14 @@ export default function EventsClient({ initialEvents, churches }: Props) {
   const [duplicateTargetId, setDuplicateTargetId] = useState("");
   const [duplicateLoading, setDuplicateLoading] = useState(false);
   const [duplicateError, setDuplicateError] = useState("");
-  const [monthFilter, setMonthFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState(() => {
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+  });
   const [searchQuery, setSearchQuery] = useState("");
+  const [seriesStep, setSeriesStep] = useState(false);
+  const [seriesCount, setSeriesCount] = useState(0);
 
   const filteredEvents = useMemo(() => {
     let result = events;
@@ -73,6 +116,14 @@ export default function EventsClient({ initialEvents, churches }: Props) {
     return result;
   }, [events, monthFilter, searchQuery]);
 
+  function getSeriesCount(ev: EventItem): number {
+    const parentId = ev.isRecurrenceParent ? ev.id : ev.seriesId;
+    if (!parentId) return 0;
+    return events.filter(
+      (e) => e.id === parentId || e.seriesId === parentId
+    ).length;
+  }
+
   function handleMonthChange(value: string) {
     setMonthFilter(value);
     setSelectedIds(new Set());
@@ -90,8 +141,10 @@ export default function EventsClient({ initialEvents, churches }: Props) {
     setDate("");
     setChurchId(churches[0]?.id || "");
     setPlanningDeadline("");
+    setDeadlineOffset("2d");
     setRecurrenceRule("");
     setRecurrenceEnd("");
+    setSeriesStep(false);
     setError("");
     setModalOpen(true);
   }
@@ -100,21 +153,33 @@ export default function EventsClient({ initialEvents, churches }: Props) {
     setEditing(ev);
     setTitle(ev.title);
     setType(ev.type);
-    setDate(ev.date.split("T")[0]);
+    setDate(toLocalDatetime(ev.date));
     setChurchId(ev.church.id);
     setPlanningDeadline(
-      ev.planningDeadline
-        ? new Date(ev.planningDeadline).toISOString().slice(0, 16)
-        : ""
+      ev.planningDeadline ? toLocalDatetime(ev.planningDeadline) : ""
     );
+    setDeadlineOffset("");
     setRecurrenceRule("");
     setRecurrenceEnd("");
+    setSeriesStep(false);
     setError("");
     setModalOpen(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // If editing a series event, show the series choice step within the same modal
+    if (editing && (editing.seriesId || editing.isRecurrenceParent)) {
+      setSeriesCount(getSeriesCount(editing));
+      setSeriesStep(true);
+      return;
+    }
+
+    await doSubmit(false);
+  }
+
+  async function doSubmit(applyToSeries: boolean) {
     setLoading(true);
     setError("");
 
@@ -127,6 +192,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
             type,
             date,
             planningDeadline: planningDeadline || null,
+            applyToSeries,
           }
         : {
             title,
@@ -134,6 +200,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
             date,
             churchId,
             planningDeadline: planningDeadline || null,
+            deadlineOffset: deadlineOffset || null,
             recurrenceRule: recurrenceRule || null,
             recurrenceEnd: recurrenceEnd || null,
           };
@@ -151,7 +218,14 @@ export default function EventsClient({ initialEvents, churches }: Props) {
 
       const saved = await res.json();
 
-      if (editing) {
+      if (editing && saved.seriesUpdated) {
+        // Series was updated — reload full list
+        const listRes = await fetch("/api/events");
+        if (listRes.ok) {
+          const allEvents = await listRes.json();
+          setEvents(allEvents);
+        }
+      } else if (editing) {
         setEvents((prev) =>
           prev.map((ev) => (ev.id === saved.id ? saved : ev))
         );
@@ -167,6 +241,7 @@ export default function EventsClient({ initialEvents, churches }: Props) {
       }
 
       setModalOpen(false);
+      setSeriesStep(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur");
     } finally {
@@ -306,11 +381,17 @@ export default function EventsClient({ initialEvents, churches }: Props) {
   }
 
   function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("fr-FR", {
+    const d = new Date(iso);
+    const dateStr = d.toLocaleDateString("fr-FR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
+    const timeStr = d.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return `${dateStr} ${timeStr}`;
   }
 
   return (
@@ -415,79 +496,144 @@ export default function EventsClient({ initialEvents, churches }: Props) {
 
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editing ? "Modifier l'événement" : "Nouvel événement"}
+        onClose={() => { setModalOpen(false); setSeriesStep(false); }}
+        title={
+          seriesStep
+            ? "Modifier un événement récurrent"
+            : editing
+              ? "Modifier l'événement"
+              : "Nouvel événement"
+        }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Titre"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-          <Input
-            label="Type"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            required
-          />
-          <Input
-            label="Date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-          <Input
-            label="Date limite de planification"
-            type="datetime-local"
-            value={planningDeadline}
-            onChange={(e) => setPlanningDeadline(e.target.value)}
-          />
-          {!editing && (
-            <>
-              <Select
-                label="Église"
-                value={churchId}
-                onChange={(e) => setChurchId(e.target.value)}
-                options={churches.map((c) => ({ value: c.id, label: c.name }))}
-              />
-              <Select
-                label="Récurrence"
-                value={recurrenceRule}
-                onChange={(e) => setRecurrenceRule(e.target.value)}
-                options={[
-                  { value: "weekly", label: "Hebdomadaire" },
-                  { value: "biweekly", label: "Bi-hebdomadaire" },
-                  { value: "monthly", label: "Mensuel" },
-                ]}
-                placeholder="Aucune (événement unique)"
-              />
-              {recurrenceRule && (
-                <Input
-                  label="Fin de récurrence"
-                  type="date"
-                  value={recurrenceEnd}
-                  onChange={(e) => setRecurrenceEnd(e.target.value)}
-                  required
-                />
-              )}
-            </>
-          )}
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => setModalOpen(false)}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Enregistrement..." : "Enregistrer"}
-            </Button>
+        {seriesStep ? (
+          <div>
+            <p className="text-sm text-gray-600 mb-6">
+              Cet événement fait partie d&apos;une série de{" "}
+              <span className="font-semibold">{seriesCount} événement(s)</span>.
+              Que souhaitez-vous modifier ?
+            </p>
+            {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => doSubmit(false)}
+                disabled={loading}
+                variant="secondary"
+              >
+                {loading ? "Enregistrement..." : "Cet événement seul"}
+              </Button>
+              <Button
+                onClick={() => doSubmit(true)}
+                disabled={loading}
+              >
+                {loading
+                  ? "Enregistrement..."
+                  : `Toute la série (${seriesCount} événements)`}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setSeriesStep(false)}
+                className="text-sm text-gray-500 hover:text-gray-700 underline mt-1"
+              >
+                Retour au formulaire
+              </button>
+            </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Titre"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+            <Input
+              label="Type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              required
+            />
+            <Input
+              label="Date et heure"
+              type="datetime-local"
+              value={date}
+              onChange={(e) => {
+                const newDate = e.target.value;
+                setDate(newDate);
+                if (deadlineOffset && newDate) {
+                  setPlanningDeadline(computeDeadline(newDate, deadlineOffset));
+                }
+              }}
+              required
+            />
+            <Select
+              label="Délai avant l'événement"
+              value={deadlineOffset}
+              onChange={(e) => {
+                const offset = e.target.value;
+                setDeadlineOffset(offset);
+                if (offset && date) {
+                  setPlanningDeadline(computeDeadline(date, offset));
+                }
+              }}
+              options={DEADLINE_OFFSETS.map((o) => ({
+                value: o.value,
+                label: o.label,
+              }))}
+            />
+            <Input
+              label="Date limite de planification"
+              type="datetime-local"
+              value={planningDeadline}
+              onChange={(e) => {
+                setPlanningDeadline(e.target.value);
+                setDeadlineOffset("");
+              }}
+            />
+            {!editing && (
+              <>
+                <Select
+                  label="Église"
+                  value={churchId}
+                  onChange={(e) => setChurchId(e.target.value)}
+                  options={churches.map((c) => ({ value: c.id, label: c.name }))}
+                />
+                <Select
+                  label="Récurrence"
+                  value={recurrenceRule}
+                  onChange={(e) => setRecurrenceRule(e.target.value)}
+                  options={[
+                    { value: "weekly", label: "Hebdomadaire" },
+                    { value: "biweekly", label: "Bi-hebdomadaire" },
+                    { value: "monthly", label: "Mensuel" },
+                  ]}
+                  placeholder="Aucune (événement unique)"
+                />
+                {recurrenceRule && (
+                  <Input
+                    label="Fin de récurrence"
+                    type="date"
+                    value={recurrenceEnd}
+                    onChange={(e) => setRecurrenceEnd(e.target.value)}
+                    required
+                  />
+                )}
+              </>
+            )}
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => setModalOpen(false)}
+              >
+                Annuler
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Enregistrement..." : "Enregistrer"}
+              </Button>
+            </div>
+          </form>
+        )}
       </Modal>
 
       <Modal
