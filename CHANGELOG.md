@@ -6,6 +6,12 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.7.1] - 2026-03-06
+
+### Corrige
+
+- Ajout migration manquante pour la colonne `hasSeenTour` (tour guide)
+
 ## [v0.7.0] - 2026-03-06
 
 ### Ajoute
