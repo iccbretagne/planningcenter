@@ -6,6 +6,21 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.7.0] - 2026-03-06
+
+### Ajoute
+
+- Sidebar : departements groupes par ministere (accordeon imbrique)
+- Tour guide interactif (GuidedTour) avec etapes contextuelles
+- API user preferences pour persister l'etat du tour guide
+- Attributs data-tour sur les composants pour le guidage
+
+### Ameliore
+
+- EventSelector, BottomNav, NotificationBell : ameliorations responsive
+- Planning route : optimisation des requetes
+- Suppression de ScreenshotPlaceholder (remplace par images reelles)
+
 ## [v0.6.0] - 2026-03-06
 
 ### Ajoute
