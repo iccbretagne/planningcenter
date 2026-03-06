@@ -30,7 +30,11 @@ export default function EventSelector({
       const now = new Date();
       const upcoming = events.find((e) => new Date(e.date) >= now);
       const eventId = (upcoming || events[0]).id;
-      router.replace(`/dashboard?dept=${selectedDeptId}&event=${eventId}`);
+      // Preserve existing search params (e.g. tour=1)
+      const params = new URLSearchParams(window.location.search);
+      params.set("dept", selectedDeptId);
+      params.set("event", eventId);
+      router.replace(`/dashboard?${params.toString()}`);
     }
   }, [selectedEventId, events, selectedDeptId, router]);
 
@@ -47,7 +51,7 @@ export default function EventSelector({
   };
 
   return (
-    <div>
+    <div data-tour="event-selector">
       <label className="block mb-1 text-sm font-medium text-gray-700">
         Evenement
       </label>

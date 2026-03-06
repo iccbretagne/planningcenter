@@ -33,8 +33,36 @@ export async function GET(
       },
     });
 
+    // If no EventDepartment link, return members with no planning statuses
     if (!eventDept) {
-      throw new ApiError(404, "Event-department link not found");
+      const department = await prisma.department.findUnique({
+        where: { id: departmentId },
+        include: { members: { orderBy: { lastName: "asc" } } },
+      });
+
+      if (!department) {
+        throw new ApiError(404, "Department not found");
+      }
+
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+        select: { planningDeadline: true },
+      });
+
+      const deadlinePassed = event?.planningDeadline
+        ? new Date() > new Date(event.planningDeadline)
+        : false;
+
+      return successResponse({
+        eventDepartment: null,
+        members: department.members.map((m) => ({
+          ...m,
+          status: null,
+          planningId: null,
+        })),
+        planningDeadline: event?.planningDeadline ?? null,
+        deadlinePassed,
+      });
     }
 
     const members = eventDept.department.members.map((member) => {

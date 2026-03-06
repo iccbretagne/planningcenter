@@ -276,12 +276,15 @@ export default function MonthlyPlanningView({ departmentId, departmentName }: Pr
                   <ul className="space-y-1">
                     {event.members.map((member) => (
                       <li key={member.id} className="text-sm text-gray-700">
+                        {member.firstName} {member.lastName}
                         {member.status === "EN_SERVICE_DEBRIEF" && (
-                          <svg className="inline-block w-4 h-4 mr-1 text-icc-violet align-text-bottom" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2C6.48 2 2 5.58 2 10c0 2.24 1.12 4.27 2.94 5.72L3 22l5.34-2.56C9.5 19.8 10.72 20 12 20c5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+                          <svg className="inline-block w-5 h-5 ml-1 text-icc-violet align-text-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                            <circle cx="8" cy="10" r="1" fill="currentColor" stroke="none"/>
+                            <circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/>
+                            <circle cx="16" cy="10" r="1" fill="currentColor" stroke="none"/>
                           </svg>
                         )}
-                        {member.firstName} {member.lastName}
                         {member.tasks.length > 0 && (
                           <span className="ml-1.5 text-xs text-icc-violet">
                             ({member.tasks.join(", ")})

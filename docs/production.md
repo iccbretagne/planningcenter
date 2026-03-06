@@ -260,6 +260,43 @@ Un script `scripts/deploy.sh` est egalement disponible pour les deploiements man
 DEPLOY_PATH=/opt/planning bash scripts/deploy.sh 0.6.0
 ```
 
+## Captures du guide utilisateur
+
+Les captures d'ecran de la page `/guide` sont hebergees sur une **release GitHub dediee** (`guide-assets`) et non dans le code source. Elles sont chargees depuis :
+
+```
+https://github.com/iccbretagne/planningcenter/releases/download/guide-assets/<fichier>.png
+```
+
+### Mettre a jour les captures
+
+```bash
+# 1. Supprimer l'ancienne release
+gh release delete guide-assets --yes
+
+# 2. Recreer la release
+gh release create guide-assets --title "Guide - Assets images" --notes "Captures d'ecran pour la page /guide" --latest=false
+
+# 3. Uploader les nouvelles captures
+gh release upload guide-assets guide-*.png
+```
+
+### Fichiers attendus
+
+| Fichier | Page source |
+|---------|-------------|
+| `guide-planning-view.png` | `/dashboard?dept=<id>` — grille planning |
+| `guide-planning-edit.png` | `/dashboard?dept=<id>` — edition statut |
+| `guide-members-list.png` | `/admin/members` — tableau des STAR |
+| `guide-members-manage.png` | `/admin/members` — formulaire ajout/edition |
+| `guide-events-list.png` | `/events` — liste des evenements |
+| `guide-events-manage.png` | `/admin/events` — formulaire evenement |
+| `guide-admin-departments.png` | `/admin/departments` — tableau departements |
+| `guide-admin-church.png` | `/admin/churches` — parametres eglise |
+| `guide-admin-users.png` | `/admin/users` — gestion utilisateurs |
+
+> Les captures doivent etre prises en **1280x800** pour un ratio 16:9 coherent.
+
 ## Checklist de production
 
 - [ ] Variables d'environnement configurees dans `shared/.env`

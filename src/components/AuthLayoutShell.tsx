@@ -5,11 +5,15 @@ import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Breadcrumb from "@/components/Breadcrumb";
+import GuidedTour from "@/components/GuidedTour";
+
+type RoleKey = "SUPER_ADMIN" | "ADMIN" | "SECRETARY" | "MINISTER" | "DEPARTMENT_HEAD";
 
 interface AuthLayoutShellProps {
-  departments: { id: string; name: string }[];
+  departments: { id: string; name: string; ministryName?: string }[];
   adminLinks: { href: string; label: string }[];
   hasAdminAccess: boolean;
+  userRole: RoleKey;
   header: React.ReactNode;
   children: React.ReactNode;
   footer: React.ReactNode;
@@ -35,6 +39,7 @@ export default function AuthLayoutShell({
   departments,
   adminLinks,
   hasAdminAccess,
+  userRole,
   header,
   children,
   footer,
@@ -109,6 +114,9 @@ export default function AuthLayoutShell({
 
       {/* Bottom navigation (mobile only) */}
       <BottomNav hasAdminAccess={hasAdminAccess} />
+
+      {/* Interactive guided tour */}
+      <GuidedTour userRole={userRole} />
     </div>
   );
 }

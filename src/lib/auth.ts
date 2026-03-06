@@ -22,6 +22,7 @@ declare module "next-auth" {
       displayName: string | null;
       image: string | null;
       isSuperAdmin: boolean;
+      hasSeenTour: boolean;
       churchRoles: {
         id: string;
         churchId: string;
@@ -85,10 +86,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       const dbUser = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { displayName: true, isSuperAdmin: true },
+        select: { displayName: true, isSuperAdmin: true, hasSeenTour: true },
       });
       session.user.displayName = dbUser?.displayName ?? null;
       session.user.isSuperAdmin = dbUser?.isSuperAdmin ?? false;
+      session.user.hasSeenTour = dbUser?.hasSeenTour ?? false;
 
       const churchRoles = await prisma.userChurchRole.findMany({
         where: { userId: user.id },
