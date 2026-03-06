@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 
 interface SidebarProps {
-  departments: { id: string; name: string }[];
+  departments: { id: string; name: string; ministryName?: string }[];
   adminLinks: { href: string; label: string }[];
   onClose?: () => void;
 }
@@ -49,18 +49,20 @@ function AccordionSection({
   icon,
   defaultOpen = false,
   isActive = false,
+  dataTour,
   children,
 }: {
   title: string;
   icon: React.ReactNode;
   defaultOpen?: boolean;
   isActive?: boolean;
+  dataTour?: string;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div>
+    <div data-tour={dataTour}>
       <button
         onClick={() => setOpen(!open)}
         className={`${sectionHeaderBase} ${isActive ? sectionHeaderActive : sectionHeaderIdle} rounded-md`}
@@ -87,6 +89,109 @@ function AccordionSection({
   );
 }
 
+/* ── Départements groupés par ministère (accordéon) ───── */
+
+function MinistryGroupedDepartments({
+  departments,
+  activeDept,
+  onClose,
+}: {
+  departments: { id: string; name: string; ministryName?: string }[];
+  activeDept: string | null;
+  onClose?: () => void;
+}) {
+  // Group departments by ministry
+  const grouped: { ministry: string; depts: typeof departments }[] = [];
+  const seen = new Map<string, number>();
+  for (const dept of departments) {
+    const key = dept.ministryName || "";
+    const idx = seen.get(key);
+    if (idx !== undefined) {
+      grouped[idx].depts.push(dept);
+    } else {
+      seen.set(key, grouped.length);
+      grouped.push({ ministry: key, depts: [dept] });
+    }
+  }
+
+  // Find which ministry contains the active department
+  const activeMinistry = activeDept
+    ? departments.find((d) => d.id === activeDept)?.ministryName || null
+    : null;
+
+  const [openMinistry, setOpenMinistry] = useState<string | null>(
+    activeMinistry ?? grouped[0]?.ministry ?? null
+  );
+
+  // Open the ministry containing the active department when it changes
+  useEffect(() => {
+    if (activeMinistry !== null) {
+      setOpenMinistry(activeMinistry);
+    }
+  }, [activeMinistry]);
+
+  return (
+    <nav className="pl-4 space-y-1">
+      {grouped.map(({ ministry, depts }) => {
+        const isOpen = openMinistry === ministry;
+        const hasActiveDept = depts.some((d) => d.id === activeDept);
+        return (
+          <div key={ministry}>
+            <Link
+              href={`/dashboard?dept=${depts[0].id}`}
+              onClick={(e) => {
+                if (isOpen && !hasActiveDept) {
+                  // Already open, just navigate
+                } else if (!isOpen) {
+                  setOpenMinistry(ministry);
+                }
+                onClose?.();
+              }}
+              className={`flex items-center gap-1.5 w-full px-2 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                hasActiveDept
+                  ? "text-icc-violet"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <svg
+                className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              <span className="truncate">{ministry}</span>
+            </Link>
+            <div
+              className={`overflow-hidden transition-all duration-200 ${
+                isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="mt-0.5 space-y-0.5 pl-5">
+                {depts.map((dept) => (
+                  <Link
+                    key={dept.id}
+                    href={`/dashboard?dept=${dept.id}`}
+                    onClick={onClose}
+                    className={`block w-full text-left px-2 py-1.5 rounded-md text-sm transition-colors ${
+                      activeDept === dept.id
+                        ? "bg-icc-violet-light text-icc-violet font-medium"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {dept.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
 /* ── Sidebar ────────────────────────────────────────────── */
 
 export default function Sidebar({
@@ -110,11 +215,18 @@ export default function Sidebar({
         icon={<IconDepartments className="w-4 h-4" />}
         defaultOpen
         isActive={isDashboardActive}
+        dataTour="sidebar-departments"
       >
         {departments.length === 0 ? (
           <p className="px-3 text-sm text-gray-400">
             Aucun département assigné.
           </p>
+        ) : departments.some((d) => d.ministryName) ? (
+          <MinistryGroupedDepartments
+            departments={departments}
+            activeDept={activeDept}
+            onClose={onClose}
+          />
         ) : (
           <nav className="space-y-0.5 pl-6">
             {departments.map((dept) => (
@@ -141,6 +253,7 @@ export default function Sidebar({
         icon={<IconCalendar className="w-4 h-4" />}
         isActive={isEventsActive}
         defaultOpen={isEventsActive}
+        dataTour="sidebar-events"
       >
         <nav className="space-y-0.5 pl-6">
           <Link
@@ -174,6 +287,7 @@ export default function Sidebar({
           title="Administration"
           icon={<IconAdmin className="w-4 h-4" />}
           isActive={isAdminActive}
+          dataTour="sidebar-admin"
         >
           <nav className="space-y-0.5 pl-6">
             {adminLinks.map((link) => (

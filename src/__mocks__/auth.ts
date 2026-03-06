@@ -10,6 +10,7 @@ export function createSession(overrides: Partial<Session["user"]> = {}): Session
       displayName: null,
       image: null,
       isSuperAdmin: false,
+      hasSeenTour: false,
       churchRoles: [
         {
           id: "role-1",

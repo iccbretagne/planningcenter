@@ -9,7 +9,7 @@ import MonthlyPlanningView from "@/components/MonthlyPlanningView";
 import DepartmentTasksView from "@/components/DepartmentTasksView";
 
 interface DashboardProps {
-  searchParams: Promise<{ dept?: string; event?: string; view?: string }>;
+  searchParams: Promise<{ dept?: string; event?: string; view?: string; tour?: string }>;
 }
 
 export default async function DashboardPage({ searchParams }: DashboardProps) {
@@ -20,6 +20,7 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     dept: selectedDeptId,
     event: selectedEventId,
     view = "event",
+    tour,
   } = await searchParams;
 
   const currentChurchId = await getCurrentChurchId(session);
@@ -27,6 +28,12 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     session.user.churchRoles.flatMap((r) => hasPermission(r.role))
   );
   const canEditPlanning = userPermissions.has("planning:edit");
+
+  // Auto-trigger guided tour on first visit with a role
+  const shouldTriggerTour =
+    !session.user.hasSeenTour &&
+    !tour &&
+    session.user.churchRoles.length > 0;
 
   if (!currentChurchId) {
     return (
@@ -60,8 +67,22 @@ export default async function DashboardPage({ searchParams }: DashboardProps) {
     }
 
     if (firstDeptId) {
-      redirect(`/dashboard?dept=${firstDeptId}${view !== "event" ? `&view=${view}` : ""}`);
+      const qs = new URLSearchParams({ dept: firstDeptId });
+      if (view !== "event") qs.set("view", view);
+      if (tour) qs.set("tour", tour);
+      if (shouldTriggerTour) qs.set("tour", "1");
+      redirect(`/dashboard?${qs.toString()}`);
     }
+  }
+
+  // If dept is already selected but tour hasn't been seen, redirect with tour=1
+  if (shouldTriggerTour && selectedDeptId) {
+    const qs = new URLSearchParams();
+    qs.set("dept", selectedDeptId);
+    if (selectedEventId) qs.set("event", selectedEventId);
+    if (view !== "event") qs.set("view", view);
+    qs.set("tour", "1");
+    redirect(`/dashboard?${qs.toString()}`);
   }
 
   // Fetch department name (for month view and tasks view)

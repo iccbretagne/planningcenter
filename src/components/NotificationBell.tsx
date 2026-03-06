@@ -75,7 +75,7 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div data-tour="header-notifications" className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
         className="relative p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"

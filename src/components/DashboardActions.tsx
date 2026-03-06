@@ -16,7 +16,7 @@ export default function DashboardActions() {
   }
 
   return (
-    <div className="flex flex-wrap gap-2 md:gap-3">
+    <div data-tour="dashboard-actions" className="flex flex-wrap gap-2 md:gap-3">
       <Link
         href={buildHref("event")}
         className={`inline-flex items-center gap-2 px-3 py-2 md:px-4 text-sm font-medium rounded-lg border transition-colors ${
