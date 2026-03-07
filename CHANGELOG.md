@@ -6,6 +6,19 @@ Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Non publie]
 
+## [v0.7.4] - 2026-03-07
+
+### Corrige
+
+- Mobile : boutons de la page Utilisateurs qui débordaient hors du viewport (flex-wrap)
+- Mobile : derniers items de la sidebar masqués par la BottomNav (padding-bottom)
+
+### Documentation
+
+- Ajout de la section Webcron dans docs/production.md (crontab et service externe)
+- Ajout de CRON_SECRET dans .env.example et la checklist de production
+- Roadmap mise à jour (guide utilisateur et déploiement production cochés)
+
 ## [v0.7.3] - 2026-03-06
 
 ### Ajoute
