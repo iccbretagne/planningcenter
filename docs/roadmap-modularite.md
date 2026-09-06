@@ -22,7 +22,7 @@ extractible, ni réutilisable hors de ses routes.
 ### Ce qui est solide
 
 - `npm run lint:boundaries` passe : **652 modules, 2 532 dépendances**, aucune violation.
-- La suite de tests passe : **135 fichiers, 1 171 tests**.
+- La suite de tests passe : **135 fichiers, 1 172 tests**.
 - Les dépendances déclarées sont cohérentes : `audio` et `media` consomment `storage`, le reste
   dépend principalement de `core` et `planning`.
 - Le registry centralise correctement les abonnements transactionnels entre `planning`,
@@ -51,7 +51,7 @@ grep -rn 'await import("@/lib/registry")\|await import("@/modules' src/lib src/m
 | Priorité | Constat | Preuve | Effet |
 |---|---|---|---|
 | **Haute** | **221 fichiers de `src/app` importent Prisma directement**, dont **147 des 170 route handlers** (86 %). | `grep` ci-dessus | Les règles métier vivent dans la couche HTTP, pas dans les modules. Un module n'est ni extractible ni réutilisable ; la même règle peut diverger entre deux routes. |
-| **Haute** | Les règles de frontières ne couvrent que **4 modules sur 11** : `planning`, `discipleship`, `core`, `integration`. | `.dependency-cruiser.cjs` | `audio`, `media`, `agenda`, `accounting`, `rooms`, `jobs` et `storage` peuvent introduire des imports siblings directs sans que la CI ne dise rien. La garde donne un faux sentiment de couverture. |
+| ~~**Haute**~~ **Traité** | Les règles de frontières ne couvraient que **4 modules sur 11** : `planning`, `discipleship`, `core`, `integration`. | `.dependency-cruiser.cjs` | `audio`, `media`, `agenda`, `accounting`, `rooms`, `jobs` et `storage` pouvaient introduire des imports siblings directs sans que la CI ne dise rien. **Résolu** : les 11 modules ont désormais leur règle, `storage` étant l'unique exception nommée (voir chantier 3). |
 | **Haute** | `src/lib/auth.ts` porte des règles métier audio et importe le module audio dynamiquement. | `src/lib/auth.ts:690`, `:724`, `:748` | Cycle logique `registry → modules → auth → modules`, différé par import dynamique. Fragilise le chargement et les tests. |
 | **Moyenne** | Trois modules importent dynamiquement le registry en code de production — **par obligation, pas par contournement**. | `integration/services/msdp-service.ts:37`, `integration/auth.ts:40`, `agenda/auth.ts:35` et `:57`, `accounting/services/attachments.ts:53` | La règle `no-modules-static-import-registry` (`.dependency-cruiser.cjs:73`, severity `error`) **interdit** l'import statique inverse : `registry.ts` importe tous les modules pour calculer `rolePermissions`, un cycle y produit un `ReferenceError` TDZ non déterministe au build Turbopack (issue #446). L'import dynamique est le remède documenté. Effet résiduel réel : le graphe statique ne reflète pas ces cinq dépendances, `lint:boundaries` ne les voit pas. |
 | **Moyenne** | Le schéma Prisma porte des **FK inter-domaines** : discipolat→événement, média→événement, intégration→membre/événement/agenda, comptabilité→département, salles→événement, audio→événement. | `prisma/schema.prisma` (26 références à `eventId`) | Couplage de données légitime, mais qui impose des évolutions et suppressions coordonnées. Supprimer un événement dépend d'un handler central qui nettoie le discipolat. |
@@ -91,13 +91,20 @@ En commençant par `planning`/`events`, puis `accounting`. Cible : la route vali
 *Critère d'arrêt* : pas de conversion de masse. On déplace ce qui est déjà couvert par des tests,
 ou on écrit le test d'abord.
 
-### 3. Étendre les règles de frontières aux 11 modules
+### 3. Étendre les règles de frontières aux 11 modules — ✅ fait
 
 Et formaliser `storage` comme **infrastructure partagée** — une exception nommée et documentée,
 plutôt qu'une dépendance sibling implicitement tolérée parce qu'aucune règle ne la couvre.
 
 *Note* : la génération d'une règle par module reste préférable aux backreferences, comme le
 commentaire actuel du fichier l'explique.
+
+*Réalisé* : sept règles ajoutées (`accounting`, `agenda`, `jobs`, `rooms`, `audio`, `media`,
+`storage`). Cinq passaient sans toucher une ligne de code — ces modules n'avaient aucun import
+sibling. Les dix imports d'`audio` et `media` vont **tous** vers `storage` : l'exception se
+formule donc en un seul `pathNot`, adossé à l'ADR-0006 qui actait déjà `storage` comme
+infrastructure partagée. `storage`, lui, n'importe aucun module. Chaque règle a été vérifiée par
+un import sonde temporaire — une règle qui passe pourrait n'être qu'un motif de chemin vide.
 
 ### 4. Sortir les gardes métier de `lib/auth`
 
@@ -148,7 +155,7 @@ L'inverse casse la couverture RBAC au moment précis où on l'étend.
 - **Pas de microservices.** Le monolithe modulaire est le bon format pour ce projet et cette
   équipe. L'objectif est un monolithe dont les modules sont *nets*, pas des modules déployables.
 - **Pas de conversion de masse des 147 routes.** Un grand refactoring sans filet sur une base à
-  1 171 tests, dont la couverture métier est inégale, coûterait plus qu'il ne rapporterait.
+  1 172 tests, dont la couverture métier est inégale, coûterait plus qu'il ne rapporterait.
 - **Pas de suppression des FK inter-domaines.**
 
 ## Indicateurs
@@ -158,7 +165,7 @@ De quoi mesurer le progrès sans se raconter d'histoires :
 | Indicateur | Aujourd'hui | Cible |
 |---|---|---|
 | Route handlers important Prisma directement | 147 / 170 | en baisse à chaque release, jamais en hausse |
-| Modules couverts par une règle de frontière | 4 / 11 | 11 / 11 |
+| Modules couverts par une règle de frontière | **11 / 11** ✅ | 11 / 11 |
 | Imports dynamiques `auth`→`audio` (règles métier hors module) | 3 | 0 |
 | Imports dynamiques module→registry (imposés par la règle anti-cycle) | 5 | 5, sauf inversion de la composition (ADR préalable) |
 | Modules couverts par les tests de manifestes | 3 / 11 | 11 / 11 |
