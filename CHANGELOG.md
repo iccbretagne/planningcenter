@@ -4,6 +4,27 @@ Toutes les modifications notables de ce projet sont documentées ici.
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Ce projet suit [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [v1.21.0] - 2026-09-06
+
+### Ajouté
+
+- **Adresse postale dans l'export des demandes d'intégration** : la colonne « Adresse »
+  s'intercale entre « Email » et « Ville » et reprend l'adresse saisie sur le formulaire, cellule
+  vide si non renseignée. La spec 033 excluait volontairement l'adresse précise au profit de la
+  seule ville ; la décision est révisée, la répartition géographique par famille d'impact se
+  faisant à l'adresse. Les notes internes et le motif d'abandon restent exclus de l'export.
+
+### Modifié
+
+- Mise à jour des dépendances (minor/patch) : `next` et `eslint-config-next` 16.3.3 → 16.3.4,
+  `@aws-sdk/client-s3` et `@aws-sdk/s3-request-presigner` 3.1118.0 → 3.1124.0, `sharp` 0.35.3 →
+  0.35.4, `mariadb` 3.5.3 → 3.5.4, `html2canvas-pro` 2.4.0 → 2.4.1, `tsx` 4.23.12 → 4.23.13.
+
+### Documentation
+
+- Achèvement de l'accentuation française de `docs/api.md` et correction d'une fence de code
+  orpheline.
+
 ## [v1.20.0] - 2026-09-03
 
 ### Ajouté
