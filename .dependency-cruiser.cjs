@@ -7,7 +7,12 @@ module.exports = {
      * Chaque module ne peut importer que depuis lui-même, src/core et src/lib.
      * La communication cross-module passe uniquement par l'event bus (src/core/event-bus.ts).
      *
-     * Une règle par module : plus explicite, pas de dépendance aux backreferences.
+     * Une règle par module — les 11 modules sont couverts : plus explicite, pas de
+     * dépendance aux backreferences.
+     *
+     * Seule exception, nommée : `storage` est l'infrastructure de stockage partagée
+     * (ADR-0006), pas un domaine métier. `audio` et `media` peuvent l'importer ;
+     * `storage` n'importe aucun module.
      */
     {
       name: "no-planning-imports-other-modules",
@@ -55,6 +60,96 @@ module.exports = {
       },
       to: {
         path: "^src/modules/(?!integration/)",
+      },
+    },
+    {
+      name: "no-accounting-imports-other-modules",
+      severity: "error",
+      comment: "Le module accounting ne peut pas importer directement depuis un autre module.",
+      from: {
+        path: "^src/modules/accounting/",
+        pathNot: "/__tests__/",
+      },
+      to: {
+        path: "^src/modules/(?!accounting/)",
+      },
+    },
+    {
+      name: "no-agenda-imports-other-modules",
+      severity: "error",
+      comment: "Le module agenda ne peut pas importer directement depuis un autre module.",
+      from: {
+        path: "^src/modules/agenda/",
+        pathNot: "/__tests__/",
+      },
+      to: {
+        path: "^src/modules/(?!agenda/)",
+      },
+    },
+    {
+      name: "no-jobs-imports-other-modules",
+      severity: "error",
+      comment: "Le module jobs ne peut pas importer directement depuis un autre module.",
+      from: {
+        path: "^src/modules/jobs/",
+        pathNot: "/__tests__/",
+      },
+      to: {
+        path: "^src/modules/(?!jobs/)",
+      },
+    },
+    {
+      name: "no-rooms-imports-other-modules",
+      severity: "error",
+      comment: "Le module rooms ne peut pas importer directement depuis un autre module.",
+      from: {
+        path: "^src/modules/rooms/",
+        pathNot: "/__tests__/",
+      },
+      to: {
+        path: "^src/modules/(?!rooms/)",
+      },
+    },
+    {
+      name: "no-audio-imports-other-modules",
+      severity: "error",
+      comment:
+        "Le module audio ne peut importer aucun autre module, sauf storage (infrastructure partagee, ADR-0006).",
+      from: {
+        path: "^src/modules/audio/",
+        pathNot: "/__tests__/",
+      },
+      to: {
+        path: "^src/modules/(?!audio/|storage/)",
+      },
+    },
+    {
+      name: "no-media-imports-other-modules",
+      severity: "error",
+      comment:
+        "Le module media ne peut importer aucun autre module, sauf storage (infrastructure partagee, ADR-0006).",
+      from: {
+        path: "^src/modules/media/",
+        pathNot: "/__tests__/",
+      },
+      to: {
+        path: "^src/modules/(?!media/|storage/)",
+      },
+    },
+    /**
+     * storage est l'infrastructure partagee (ADR-0006) : les autres modules
+     * l'importent, mais lui-meme ne depend d'aucun module metier.
+     */
+    {
+      name: "no-storage-imports-other-modules",
+      severity: "error",
+      comment: "Le module storage ne peut pas importer directement depuis un autre module.",
+      from: {
+        path: "^src/modules/storage/",
+        pathNot: "/__tests__/",
+      },
+      to: {
+        path: "^src/modules/(?!storage/)",
       },
     },
 
