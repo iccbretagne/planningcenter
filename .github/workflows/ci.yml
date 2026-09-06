@@ -60,9 +60,9 @@ jobs:
       #
       # NEXT_PUBLIC_TURNSTILE_SITE_KEY est inliné dans le bundle client au moment du build : la
       # renseigner uniquement dans shared/.env sur le serveur ne suffit pas, le widget Turnstile
-      # des formulaires publics (`/rejoindre`, `/agenda-public`) resterait vide en production et
-      # bloquerait toute soumission (spec 030). C'est une clé publique (destinée à être exposée
-      # côté client), donc une variable de repository plutôt qu'un secret.
+      # du formulaire public `/agenda-public` resterait vide en production et bloquerait toute
+      # soumission (spec 030). C'est une clé publique (destinée à être exposée côté client),
+      # donc une variable de repository plutôt qu'un secret.
       - run: npm run build
         env:
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
