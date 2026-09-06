@@ -53,11 +53,11 @@ grep -rn 'await import("@/lib/registry")\|await import("@/modules' src/lib src/m
 | **Haute** | **221 fichiers de `src/app` importent Prisma directement**, dont **147 des 170 route handlers** (86 %). | `grep` ci-dessus | Les règles métier vivent dans la couche HTTP, pas dans les modules. Un module n'est ni extractible ni réutilisable ; la même règle peut diverger entre deux routes. |
 | **Haute** | Les règles de frontières ne couvrent que **4 modules sur 11** : `planning`, `discipleship`, `core`, `integration`. | `.dependency-cruiser.cjs` | `audio`, `media`, `agenda`, `accounting`, `rooms`, `jobs` et `storage` peuvent introduire des imports siblings directs sans que la CI ne dise rien. La garde donne un faux sentiment de couverture. |
 | **Haute** | `src/lib/auth.ts` porte des règles métier audio et importe le module audio dynamiquement. | `src/lib/auth.ts:690`, `:724`, `:748` | Cycle logique `registry → modules → auth → modules`, différé par import dynamique. Fragilise le chargement et les tests. |
-| **Haute** | Le contournement est **réciproque et installé** : trois modules importent dynamiquement le registry en code de production. | `integration/services/msdp-service.ts:37`, `integration/auth.ts:40`, `agenda/auth.ts:35` et `:57`, `accounting/services/attachments.ts:53` | Ce n'est pas un accident isolé dans `auth.ts` mais un motif reproduit. Le graphe statique ne reflète plus les dépendances réelles — donc `lint:boundaries` ne les voit pas. |
+| **Moyenne** | Trois modules importent dynamiquement le registry en code de production — **par obligation, pas par contournement**. | `integration/services/msdp-service.ts:37`, `integration/auth.ts:40`, `agenda/auth.ts:35` et `:57`, `accounting/services/attachments.ts:53` | La règle `no-modules-static-import-registry` (`.dependency-cruiser.cjs:73`, severity `error`) **interdit** l'import statique inverse : `registry.ts` importe tous les modules pour calculer `rolePermissions`, un cycle y produit un `ReferenceError` TDZ non déterministe au build Turbopack (issue #446). L'import dynamique est le remède documenté. Effet résiduel réel : le graphe statique ne reflète pas ces cinq dépendances, `lint:boundaries` ne les voit pas. |
 | **Moyenne** | Le schéma Prisma porte des **FK inter-domaines** : discipolat→événement, média→événement, intégration→membre/événement/agenda, comptabilité→département, salles→événement, audio→événement. | `prisma/schema.prisma` (26 références à `eventId`) | Couplage de données légitime, mais qui impose des évolutions et suppressions coordonnées. Supprimer un événement dépend d'un handler central qui nettoie le discipolat. |
 | **Moyenne** | `ENABLED_MODULES` ne filtre que les manifestes du registry ; routes, schéma et code des modules restent présents. | `src/core/boot.ts` | C'est un mécanisme de navigation et de permissions, pas un chargement optionnel de modules. Le nom promet plus que ce que le code fait. |
 | **Basse** | Les tests de manifestes couvrent **3 modules** (`core`, `planning`, `discipleship`) ; les tests RBAC sur registry en couvrent **4** (les mêmes + `accounting`). | `src/modules/__tests__/manifests.test.ts:7`, `src/core/__tests__/permissions.test.ts:4-7` | Une dépendance, une permission ou un manifeste des sept autres modules peut dériver sans alerte. |
-| **Basse** | `src/lib/__tests__/permissions.test.ts` teste `hasPermission`, le helper **déprécié**. | fichier entier | Le fichier qui porte le nom « permissions » ne couvre pas le mécanisme réellement utilisé. Un lecteur qui cherche la couverture RBAC tombe d'abord sur le mauvais fichier. |
+| **Basse** | `src/lib/__tests__/permissions.test.ts` teste `hasPermission`, le helper **déprécié** — et ce helper sert aussi d'oracle au test du mécanisme réel. | fichier entier ; `src/core/__tests__/permissions.test.ts:9` | Le fichier qui porte le nom « permissions » ne couvre pas le mécanisme réellement utilisé. Surtout, `hasPermission` n'est pas isolé : `core/__tests__/permissions.test.ts` l'importe comme **matrice de référence** pour valider `buildRolePermissions`. Supprimer le déprécié sans précaution supprime l'oracle du test qui le remplace. |
 
 ### Le symptôme le plus lisible
 
@@ -105,9 +105,15 @@ commentaire actuel du fichier l'explique.
 du module audio hébergées dans l'infrastructure d'authentification. Les déplacer dans
 `src/modules/audio/auth.ts` — le motif existe déjà dans `agenda/auth.ts` et `integration/auth.ts`.
 
-Traiter dans le même geste les imports dynamiques inverses vers le registry : le registry doit
-**composer** des abonnements déclarés par les modules, pas être appelé depuis eux. C'est le
-chantier qui rendra `lint:boundaries` à nouveau représentatif.
+Les trois imports `auth.ts` → `audio` disparaissent avec ce déplacement.
+
+Les cinq imports `module` → `registry`, eux, **ne se retirent pas par déplacement de fichier** :
+ils sont imposés par la règle `no-modules-static-import-registry`, qui protège d'un cycle réel
+avec la racine de composition (issue #446). Les supprimer suppose d'inverser la composition — le
+registry **compose** des abonnements et des permissions déclarés par les modules au lieu d'être
+appelé depuis eux. C'est une refonte de `src/lib/registry.ts`, pas un nettoyage : à traiter comme
+un chantier séparé, précédé d'un ADR, et seulement si le coût du graphe incomplet le justifie.
+Tant qu'il n'est pas fait, l'import dynamique reste la bonne réponse et non une dette.
 
 *Attention* : ADR-0010 vient d'acter que l'accès transverse inter-églises s'implémente par un
 helper dédié au module. Ce chantier applique cette décision au code existant plutôt qu'il ne la
@@ -132,6 +138,11 @@ vérifiables. Au passage, clarifier le sort de `src/lib/__tests__/permissions.te
 supprimer le test avec le helper déprécié qu'il couvre, soit le renommer pour qu'il cesse de se
 faire passer pour la couverture RBAC du projet.
 
+*Ordre imposé* : `core/__tests__/permissions.test.ts:9` importe `hasPermission` comme matrice de
+référence pour valider `buildRolePermissions`. Il faut donc d'abord **figer la matrice attendue
+en dur dans ce test**, et seulement ensuite supprimer le helper déprécié et son fichier de test.
+L'inverse casse la couverture RBAC au moment précis où on l'étend.
+
 ## Ce qu'on ne fait pas
 
 - **Pas de microservices.** Le monolithe modulaire est le bon format pour ce projet et cette
@@ -148,7 +159,8 @@ De quoi mesurer le progrès sans se raconter d'histoires :
 |---|---|---|
 | Route handlers important Prisma directement | 147 / 170 | en baisse à chaque release, jamais en hausse |
 | Modules couverts par une règle de frontière | 4 / 11 | 11 / 11 |
-| Imports dynamiques contournant le graphe (prod) | 8 — dont 5 module→registry, 3 `auth`→`audio` | 0 |
+| Imports dynamiques `auth`→`audio` (règles métier hors module) | 3 | 0 |
+| Imports dynamiques module→registry (imposés par la règle anti-cycle) | 5 | 5, sauf inversion de la composition (ADR préalable) |
 | Modules couverts par les tests de manifestes | 3 / 11 | 11 / 11 |
 | Modules couverts par les tests RBAC registry | 4 / 11 | 11 / 11 |
 
